@@ -8,10 +8,13 @@ Capture a region, window, desktop, or scrolling area; annotate images; record vi
 
 ## Run the app
 
-Built releases are in `dist/`:
+Download **[FrameForge 0.2.5 for Windows](https://github.com/metalshanked/FrameForge/releases/tag/v0.2.5)**:
 
-- **Installer:** `FrameForge-Setup-0.2.5.exe`. Installs for your Windows account, creates Start-menu shortcuts, and includes an uninstaller. Desktop and sign-in shortcuts are optional. Choose the installation directory during setup.
-- **Portable:** `portable/FrameForge.exe`. One executable; no separate .NET installation is needed. Dependency licenses are also available inside **Preferences → Open-source licenses**.
+- **[Windows installer (recommended)](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/FrameForge-Setup-0.2.5.exe)** — installs for your Windows account, creates Start-menu shortcuts, and includes an uninstaller. Desktop and sign-in shortcuts are optional. Choose the installation directory during setup.
+- **[Portable EXE](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/FrameForge-Portable-0.2.5.exe)** — run directly without installing the app; no separate .NET installation is needed.
+- **[SHA256 checksums](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/SHA256SUMS.txt)** — verify the downloaded files.
+
+Dependency licenses are available inside **Preferences → Open-source licenses**. Locally built packages are written to `dist/`.
 
 Requires Windows 10 version 2004 or later / Windows 11, x64, and an interactive desktop. This early release is unsigned.
 
