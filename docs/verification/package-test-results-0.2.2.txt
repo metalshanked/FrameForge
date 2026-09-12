@@ -1,0 +1,13 @@
+PASS | Installer exits successfully and writes the app
+PASS | Installed executable matches portable SHA256
+PASS | Per-user uninstall registration has version and location
+PASS | Startup is opt-in and disabled on a fresh install
+PASS | Start-menu shortcut targets the installed app
+PASS | Installer includes MIT and third-party licenses
+PASS | Installed single-file app passes its self-test suite
+PASS | Upgrade preserves user-created files
+PASS | Upgrade preserves prior startup opt-in with updated executable path
+PASS | Uninstall removes its executable and integration entries
+PASS | Uninstall preserves user-created files
+PASS | Uninstall removes its shortcuts
+PASS | App test data is preserved after uninstall

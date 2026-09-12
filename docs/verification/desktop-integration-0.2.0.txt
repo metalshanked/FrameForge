@@ -1,0 +1,9 @@
+FrameForge 0.2.0 — desktop integration smoke checks
+PASS | --background starts a responding process with no visible editor window.
+PASS | Launching again exits the second process and restores the original editor instance.
+PASS | Original icon renders in the editor header and window title bar.
+PASS | Preferences displays close-to-tray checked and startup unchecked.
+PASS | Open-source licenses displays embedded FrameForge MIT, NAudio, NSIS, and runtime notices.
+PASS | Clicking Exit FrameForge ends the original process.
+Close-to-tray/document restoration and tray icon removal are also covered by the 59-check automated suite.
+The sign-in command and installer startup entry were verified; a full Windows sign-out/sign-in was not performed.

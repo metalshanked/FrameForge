@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>../../assets/FrameForge.ico</ApplicationIcon>
+    <AssemblyName>FrameForge</AssemblyName>
+    <Version>0.2.5</Version>
+    <Authors>FrameForge contributors</Authors>
+    <Description>Screen capture, annotation, scrolling capture, recording, and OCR for Windows.</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup><PackageReference Include="NAudio" Version="2.2.1" /></ItemGroup>
+  <ItemGroup><Resource Include="../../assets/FrameForge.ico" Link="Assets/FrameForge.ico" /></ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../LICENSE" LogicalName="Licenses/MIT.txt" />
+    <EmbeddedResource Include="../../THIRD-PARTY-NOTICES.md" LogicalName="Licenses/ThirdParty.txt" />
+    <EmbeddedResource Include="../../licenses/*.txt" LogicalName="Licenses/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

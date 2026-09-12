@@ -1,0 +1,15 @@
+# Local toolchains, generated releases, test data, and build output
+.local/
+artifacts/
+dist/
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.log
+*.tmp
+*.ffg
+.env
+.env.*
+!.env.example

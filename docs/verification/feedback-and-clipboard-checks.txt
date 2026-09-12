@@ -1,0 +1,20 @@
+FrameForge 0.1.2 — button feedback and automatic clipboard checks
+Date: September 11, 2026
+Final FrameForge.dll SHA256: B2BDAC9A8E463FE229F16DF41303A52738ED11C12722CC51A259D1F879B43B78
+
+Windows input observations through Computer Use @oai/sky:
+PASS | Box click visibly darkens the button briefly and shows a persistent selected outline.
+PASS | The inspector and status change to Rectangle / Rectangle selected.
+PASS | Ctrl+tilde opens the region selector.
+PASS | Drag (300,180) to (700,380) in logical coordinates captures 700 x 350 physical pixels at 175% scaling.
+PASS | Completion shows Capture copied to clipboard / Ctrl+V to paste.
+PASS | Clicking Paste without clicking Copy opens the matching 700 x 350 image.
+
+Automated screenshot-completion and cancellation checks:
+PASS | Completed screenshot opens in the editor and the native clipboard contains identical PNG pixels.
+PASS | Cancelling the actual capture workflow preserves the clipboard pixels and the open document.
+RESULT | Entire final regression suite: 54 passed, 0 failed.
+
+The real input check preceded a rebuild that added foreground synchronization and diagnostics to the test runner only. The resulting final binary was used for the complete 54-check run. Early background test runs were dismissed by the capture overlay's switch-away cancellation because foreground focus belonged to a window outside the test process. Activating the test window before the suite proceeded resolved that interference.
+
+Button down uses an immediate inset/scale and darker face; release returns the face and shows a 240 ms fading click highlight. These are shared template states. The real-input screenshots captured the click highlight and persistent selected tool, not a held mouse-down frame. Earlier capture/shortcut checks remain recorded in desktop-input-checks.txt under their original 0.1.1 hash.

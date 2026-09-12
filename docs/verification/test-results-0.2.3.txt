@@ -1,0 +1,65 @@
+PASS | Shell directory path reaches the same file with spaces and Unicode
+PASS | Shell file path preserves file identity
+PASS | Missing shell destination reports failure
+PASS | Default region shortcut is Ctrl plus the tilde key
+PASS | Shortcut recorder recognizes the physical tilde key
+PASS | Shortcut recorder preserves Shift separately
+PASS | Unmodified shortcuts and Escape are rejected
+PASS | Duplicate shortcut assignments are rejected
+PASS | Custom shortcuts persist across reload
+PASS | Invalid settings safely restore shortcut defaults
+PASS | Tray preferences persist across reload
+PASS | Startup command quotes executable paths and starts quietly
+PASS | Selection outline remains visible on a white capture
+PASS | Image normalization
+PASS | Undo annotation
+PASS | Redo annotation
+PASS | Render all annotation types
+PASS | Project round trip
+PASS | Crop clips to image bounds
+PASS | Undo restores crop and layers
+PASS | Resize
+PASS | Undo resize
+PASS | Opaque redaction in exported pixels
+PASS | Blur does not reveal pixels beneath redaction
+PASS | Export and reopen png
+PASS | Export and reopen jpg
+PASS | Export and reopen bmp
+PASS | Export and reopen tiff
+PASS | Scrolling overlap finds exact offset | shift=240, error=0.000
+PASS | Scrolling stitch pixel equality
+PASS | Scrolling duplicate detection
+PASS | Scrolling rejects unrelated content
+PASS | Unsupported project rejected
+PASS | Windows OCR recognizes sample | FRAMEFORGE / SAMPLE IMAGE / Capture. Explain. Share. / Draw an arrow. Highlight what matters. / Every good explanation starts with a clear picture. / Try your first annotation
+PASS | FFmpeg H.264/AAC encode
+PASS | Trimmed MP4 decodes
+PASS | Animated GIF has multiple frames | frames=12
+PASS | Compact layout keeps capture folder, search, preferences, and Exit visible
+PASS | Welcome button opens editable document
+PASS | Image commands enable only after an image is open
+PASS | Undo button works
+PASS | Redo button works
+PASS | Native clipboard image round trip
+PASS | Paste button opens clipboard image
+PASS | Native GDI window-area capture
+PASS | Window enumeration finds app
+PASS | Capture overlays remain enabled for native input | open=2, completed=False, foreground=SelectionWindow
+PASS | Selection geometry returns physical pixel rectangle
+PASS | Successful selection removes every overlay
+PASS | Escape handler cancels and clears overlays
+PASS | Cancellation token releases capture
+PASS | Closing a selection window cancels the whole session
+PASS | Safety timeout clears capture overlays
+PASS | Switching away cancels capture
+PASS | Repeated capture cancellation leaves no overlays
+PASS | Completed screenshot opens in editor and auto-copies identical pixels
+PASS | Cancelled capture preserves clipboard and the open image
+PASS | Real screen recording with pause/resume decodes
+PASS | System loopback recording produces decodable audio
+PASS | Automatic scrolling captures real scrolling window | original=951, stitched=1371
+PASS | Live stitch offsets match actual scroll movement | 5 frames aligned within 2 pixels
+PASS | Closing editor keeps tray and capture process available
+PASS | Restoring from tray preserves the open document
+PASS | Explicit Exit removes the tray icon
+RESULT | 64 passed | 0 failed

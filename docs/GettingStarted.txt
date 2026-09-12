@@ -1,0 +1,32 @@
+FRAMEFORGE 0.2.5
+
+Capture: press Ctrl plus the tilde/backtick key (no Shift needed).
+Completed screenshots open in the editor and copy automatically to the clipboard.
+Paste with Ctrl+V. After adding annotations, use Copy image for the edited image.
+
+SYSTEM TRAY
+Closing the editor keeps FrameForge running in the system tray by default.
+Double-click the purple F icon to reopen the editor.
+The icon may be inside Windows' hidden-icons overflow near the clock.
+Right-click it for capture, shortcuts, preferences, and Exit FrameForge.
+Exit FrameForge quits completely and releases the capture shortcuts.
+
+PREFERENCES
+Turn Start FrameForge when I sign in to Windows on to launch quietly in the tray.
+Turn Keep running in the tray off if you prefer the window's Close button to exit.
+Keyboard shortcuts can be changed independently in Keyboard shortcuts.
+
+YOUR DATA
+Captures and settings stay in %LOCALAPPDATA%\FrameForge.
+Uninstalling the app preserves this data.
+No account, cloud upload, or network service is used.
+
+VIDEO SUPPORT
+Recording, trim, and GIF export use a separately installed FFmpeg executable.
+The installer does not include FFmpeg. It already exists on the development PC.
+On another PC, obtain FFmpeg from https://ffmpeg.org/download.html and put
+ffmpeg.exe in a tools folder beside FrameForge.exe, or make it available in PATH.
+Restart FrameForge after installing it. Screenshots, editing, and OCR work without it.
+
+This is an unsigned, early release. Source code and the original icon are MIT
+licensed. Third-party notices are included and available in Preferences.

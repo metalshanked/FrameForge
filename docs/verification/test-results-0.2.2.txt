@@ -1,0 +1,38 @@
+PASS | Shell directory path reaches the same file with spaces and Unicode
+PASS | Shell file path preserves file identity
+PASS | Missing shell destination reports failure
+PASS | Default region shortcut is Ctrl plus the tilde key
+PASS | Shortcut recorder recognizes the physical tilde key
+PASS | Shortcut recorder preserves Shift separately
+PASS | Unmodified shortcuts and Escape are rejected
+PASS | Duplicate shortcut assignments are rejected
+PASS | Custom shortcuts persist across reload
+PASS | Invalid settings safely restore shortcut defaults
+PASS | Tray preferences persist across reload
+PASS | Startup command quotes executable paths and starts quietly
+PASS | Selection outline remains visible on a white capture
+PASS | Image normalization
+PASS | Undo annotation
+PASS | Redo annotation
+PASS | Render all annotation types
+PASS | Project round trip
+PASS | Crop clips to image bounds
+PASS | Undo restores crop and layers
+PASS | Resize
+PASS | Undo resize
+PASS | Opaque redaction in exported pixels
+PASS | Blur does not reveal pixels beneath redaction
+PASS | Export and reopen png
+PASS | Export and reopen jpg
+PASS | Export and reopen bmp
+PASS | Export and reopen tiff
+PASS | Scrolling overlap finds exact offset | shift=240, error=0.000
+PASS | Scrolling stitch pixel equality
+PASS | Scrolling duplicate detection
+PASS | Scrolling rejects unrelated content
+PASS | Unsupported project rejected
+PASS | Windows OCR recognizes sample | FRAMEFORGE / SAMPLE IMAGE / Capture. Explain. Share. / Draw an arrow. Highlight what matters. / Every good explanation starts with a clear picture. / Try your first annotation
+PASS | FFmpeg H.264/AAC encode
+PASS | Trimmed MP4 decodes
+PASS | Animated GIF has multiple frames | frames=12
+RESULT | 37 passed | 0 failed

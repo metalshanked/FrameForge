@@ -1,0 +1,20 @@
+FrameForge 0.1.1 — Windows input smoke test
+Date: September 11, 2026
+Input: Computer Use @oai/sky Windows mouse and keyboard API
+Final FrameForge.dll SHA256: 35C8DA669884930CFCDEDE70CBF138F006220351DF6083498CC9999F9C552FF9
+
+PASS | Keyboard shortcuts dialog opens and accepts Ctrl + physical backtick/tilde without Shift.
+PASS | Save applies shortcut without triggering capture while the dialog is open.
+PASS | Preferred shortcut persists after closing and reopening the application.
+PASS | Ctrl+tilde opens a focused, enabled region selector.
+PASS | Fast drag across blank wallpaper creates and opens a 210 x 525 pixel image.
+       Logical coordinates: (1505,160) to (1625,460); 120 x 300 logical pixels at 175% display scaling.
+PASS | Visible Cancel button removes the selector and preserves the prior image.
+PASS | Escape removes the selector and preserves the prior image.
+PASS | Repeated captures are possible; window enumeration after cancellation shows only the editor.
+
+The first fast-drag attempt exposed a cursor-polling race. After replacing cursor polling with WPF event coordinates, the same real-input gesture succeeded. The final automated suite was rerun on the resulting binary: 52 passed, 0 failed.
+
+The selection outline was visually checked in selection-outline.png, rendered through the production drawing code on synthetic content. The input tool completes a drag atomically, so this log does not claim a live screenshot while the mouse button was held.
+
+This is a focused smoke test on the available desktop, not validation of all hardware, keyboard layouts, or monitor configurations. Other validation limits are listed in TEST-REPORT.md and README.md.
