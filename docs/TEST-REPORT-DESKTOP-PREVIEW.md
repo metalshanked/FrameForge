@@ -6,11 +6,11 @@ Version: **0.3.0-preview.1**, unchanged during this development cycle. The Avalo
 
 - **68 shared-core checks per target** cover projects, annotation rendering, undo/redo, redaction, image transforms/export, scrolling overlap and rejection, atomic writes, process cancellation/literal arguments, recoverable capture deletion, restoration conflicts/path boundaries, and annotation resizing.
 - **3 single-instance checks** cover activation from separate process sessions, delivery of a capture request to the existing app, and restart after the primary process is killed. A real WSL test exposed a session-scoped mutex bug; the shared lock now spans sessions and handles an abandoned owner.
-- **7 native Linux media checks** exercise a real GStreamer pipeline using synthetic frames and mixed audio: H.264 MP4, stereo AAC, pause/resume, duration, full decoding, and overwrite protection.
+- **9 native Linux media checks** exercise a real GStreamer pipeline using synthetic frames and mixed audio: H.264 MP4, stereo AAC, pause/resume, duration, full decoding, overwrite protection, and odd-sized window encoding without audio.
 - **7 native Mac checks** exercise offline Vision OCR, pause/resume timestamp handling, H.264 decoding, MP4 trimming, and animated GIF conversion using synthetic input.
 - **118 package checks** across Windows (16), both Macs (24 each), and both Linux targets (27 each) verify checksums, architecture, runtime/notices, helper inclusion/permissions, Mac metadata/DMGs, and Debian metadata/dependencies.
 
-All five targets passed the startup-fix workflow at source **6cadee020424ebb0fdcf93ac7c4e2d573c2184d9**: [native CI run](https://github.com/metalshanked/FrameForge/actions/runs/34889095036). Targets are Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. A subsequent Mac screenshot-permission preflight change is being validated in the same workflow; consult the latest successful run for downloadable artifacts.
+All five targets passed the startup-fix workflow at source **6cadee020424ebb0fdcf93ac7c4e2d573c2184d9**: [native CI run](https://github.com/metalshanked/FrameForge/actions/runs/34889095036). Targets are Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. Subsequent Mac screenshot-permission preflight and Linux odd-window recording fixes are being validated in the same workflow; consult the latest successful run for downloadable artifacts.
 
 The C# application builds with zero warnings/errors using .NET 10 SDK and targets .NET 8. Swift 5 compilation reports concurrency-annotation warnings from AVFoundation and the queue-managed capture object. The native media checks do not replace real microphone, display, and permission testing.
 

@@ -151,7 +151,7 @@ class Portal:
 def require_plugins(record):
     needed = ["pipewiresrc", "videoconvert", "videorate", "queue", "pngenc", "appsink"]
     if record:
-        needed += ["x264enc", "h264parse", "mp4mux", "filesink", "pulsesrc", "audioconvert", "audioresample", "audiomixer", "avenc_aac"]
+        needed += ["videoscale", "x264enc", "h264parse", "mp4mux", "filesink", "pulsesrc", "audioconvert", "audioresample", "audiomixer", "avenc_aac"]
     missing = [name for name in needed if not Gst.ElementFactory.find(name)]
     if missing:
         raise RuntimeError("Missing GStreamer components: " + ", ".join(missing) + ". Install the dependencies listed in FrameForge's Linux setup guide.")
@@ -304,7 +304,10 @@ class Capture:
     def run(self):
         require_plugins(self.args.mode == "record")
         if self.args.test:
-            source = "videotestsrc is-live=true pattern=ball ! video/x-raw,width=320,height=240,framerate=30/1"
+            width, height = (int(value) for value in self.args.test_size.split("x"))
+            if not 2 <= width <= 4096 or not 2 <= height <= 4096:
+                raise ValueError("Synthetic test dimensions must be between 2 and 4096.")
+            source = f"videotestsrc is-live=true pattern=ball ! video/x-raw,width={width},height={height},framerate=30/1"
         else:
             self.portal = Portal()
             node, fd = self.portal.open(self.args.mode == "scroll", not self.args.no_cursor,
@@ -312,7 +315,7 @@ class Capture:
             source = "pipewiresrc name=source fd=" + str(fd) + " path=" + str(node) + " do-timestamp=true"
         capture = " ! videoconvert ! tee name=frames frames. ! queue leaky=downstream max-size-buffers=1 ! videorate drop-only=true ! video/x-raw,framerate=2/1 ! pngenc snapshot=false ! appsink name=snapshot emit-signals=true sync=false max-buffers=1 drop=true "
         if self.args.mode == "record":
-            capture += " frames. ! queue ! videoconvert ! video/x-raw,format=I420 ! x264enc tune=zerolatency speed-preset=veryfast bitrate=6000 ! h264parse ! queue ! mux. mp4mux name=mux faststart=true ! filesink location=" + quote(self.args.output)
+            capture += " frames. ! queue ! videoconvert ! videoscale ! video/x-raw,format=I420,width=(int)[2,32768,2],height=(int)[2,32768,2] ! x264enc tune=zerolatency speed-preset=veryfast bitrate=6000 ! h264parse ! queue ! mux. mp4mux name=mux faststart=true ! filesink location=" + quote(self.args.output)
             capture += audio_inputs(self.args.audio, self.args.test)
         self.pipeline = Gst.parse_launch(source + capture)
         if self.portal and self.portal.properties.get("pipewire-serial"):
@@ -344,6 +347,7 @@ def main():
     parser.add_argument("--audio", choices=("none", "system", "microphone", "both"), default="none")
     parser.add_argument("--no-cursor", action="store_true")
     parser.add_argument("--test", action="store_true", help="Synthetic media only; never opens the portal.")
+    parser.add_argument("--test-size", default="320x240", help="Synthetic source dimensions; only used with --test.")
     args = parser.parse_args()
     if args.mode == "portal-check":
         portal = Portal()

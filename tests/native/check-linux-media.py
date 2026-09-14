@@ -57,11 +57,31 @@ try:
     assert audio["codec_name"] == "aac" and audio["channels"] == 2
     duration = float(metadata["format"]["duration"])
     assert .8 < duration < 3.5, duration
-    subprocess.run(["ffmpeg", "-v", "error", "-i", str(target), "-f", "null", "-"], check=True, stdout=subprocess.DEVNULL)
+    subprocess.run(["ffmpeg", "-v", "error", "-xerror", "-i", str(target), "-fps_mode", "passthrough", "-enc_time_base", "-1", "-f", "null", "-"], check=True, stdout=subprocess.DEVNULL)
     # Missing dependencies/invalid requests must fail without entering a sharing session.
     bad = subprocess.run([python, str(helper), "record", "--test", "--output", str(target)], capture_output=True, text=True, timeout=10)
     assert bad.returncode != 0 and "overwrite" in bad.stdout.lower()
-    (OUT / "results.txt").write_text("7 native Linux checks passed: real GStreamer pipeline, pause/resume, H.264 dimensions, mixed AAC audio, duration, full media decoding, and overwrite protection.\n")
+    # Real window dimensions can be odd; the encoder must negotiate a nearby even size.
+    odd_target = OUT / ("odd-window-" + str(time.time_ns()) + ".mp4")
+    odd = subprocess.Popen([python, str(helper), "record", "--test", "--test-size", "321x241", "--output", str(odd_target)],
+                           stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        odd_ready = json.loads(odd.stdout.readline())
+        assert odd_ready["event"] == "ready" and odd_ready["width"] == 321 and odd_ready["height"] == 241
+        time.sleep(.6)
+        odd_output, odd_error = odd.communicate(json.dumps({"command": "stop", "id": 1}) + "\n", timeout=25)
+        assert odd.returncode == 0, odd_output + odd_error
+        odd_metadata = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-show_streams", "-of", "json", str(odd_target)], text=True))
+        odd_video = next(s for s in odd_metadata["streams"] if s["codec_type"] == "video")
+        assert odd_video["width"] % 2 == 0 and odd_video["height"] % 2 == 0
+        assert abs(odd_video["width"] - 321) <= 1 and abs(odd_video["height"] - 241) <= 1
+        assert not any(s["codec_type"] == "audio" for s in odd_metadata["streams"])
+        subprocess.run(["ffmpeg", "-v", "error", "-xerror", "-i", str(odd_target), "-fps_mode", "passthrough", "-enc_time_base", "-1", "-f", "null", "-"], check=True, stdout=subprocess.DEVNULL)
+    finally:
+        if odd.poll() is None:
+            odd.kill()
+            odd.wait()
+    (OUT / "results.txt").write_text("9 native Linux checks passed: real GStreamer pipeline, pause/resume, H.264 dimensions, mixed AAC audio, duration, full media decoding, overwrite protection, odd window dimensions without audio, and full odd-size recording decoding.\n")
     print((OUT / "results.txt").read_text())
 finally:
     if process.poll() is None:
