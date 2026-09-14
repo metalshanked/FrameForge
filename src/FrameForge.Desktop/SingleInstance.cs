@@ -11,7 +11,9 @@ internal static class SingleInstance
     internal static event Action<bool>? Requested;
     internal static bool Start(string[] args)
     {
-        mutex=new Mutex(true,Name,out owner);
+        // Unix shells each have a session; the app must share its lock across them.
+        mutex=new Mutex(false,@"Global\"+Name);
+        try{owner=mutex.WaitOne(0);}catch(AbandonedMutexException){owner=true;}
         if(!owner)
         {
             try{using var pipe=new NamedPipeClientStream(".",Name,PipeDirection.Out);pipe.Connect(1500);using var writer=new StreamWriter(pipe);writer.WriteLine(args.Contains("--capture")?"capture":"show");writer.Flush();}

@@ -10,6 +10,7 @@ public sealed class App : Application
 {
     public override void Initialize()
     {
+        Name="FrameForge";
         RequestedThemeVariant=ThemeVariant.Light;
         Styles.Add(new FluentTheme());
         Styles.Add(new Style(s=>s.Is<Button>()){Setters={

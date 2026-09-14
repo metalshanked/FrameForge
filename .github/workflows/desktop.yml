@@ -38,6 +38,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libfontconfig1 libx11-6 libice6 libsm6 python3-gi python3-gst-1.0 gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-pipewire gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav pulseaudio-utils ffmpeg tesseract-ocr
       - name: Portable core regression checks
         run: dotnet run --project tests/FrameForge.Core.Checks -c Release -- artifacts/desktop-checks
+      - name: Single-instance regression checks
+        run: |
+          dotnet build tests/FrameForge.Instance.Checks -c Release
+          python tests/native/check-single-instance.py dotnet tests/FrameForge.Instance.Checks/bin/Release/net8.0/FrameForge.Instance.Checks.dll
       - name: Package desktop preview
         run: python scripts/package-desktop.py --rid ${{ matrix.rid }}
       - name: Verify desktop package
@@ -58,4 +62,5 @@ jobs:
             dist/desktop-preview/*
             artifacts/desktop-checks/results.txt
             artifacts/native-*/results.txt
+            artifacts/instance-checks/results.txt
           if-no-files-found: error
