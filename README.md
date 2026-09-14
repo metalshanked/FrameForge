@@ -22,6 +22,11 @@ The portable EXE contains the .NET runtime and app dependencies. Native runtime 
 
 Recording, trimming, and GIF export need a separately installed **FFmpeg**. Set `FRAMEFORGE_FFMPEG` to the full path of `ffmpeg.exe`, put it on PATH, or place it in a `tools` folder beside the app. FFmpeg is not bundled. See [FFmpeg](https://ffmpeg.org/download.html).
 
+## Cross-platform desktop preview
+
+A separate **0.3.0-preview.1** desktop edition is being developed for Windows, macOS (Apple Silicon and Intel), and Linux (x64 and ARM64). It includes a shared editor with annotation resizing, native/portal screenshots, clipboard support, automatic and manual scrolling, native Mac/Linux recording with audio and pause/resume, offline OCR, recoverable capture deletion, and configurable shortcuts.
+
+See the **[preview guide and platform acceptance checklist](docs/CROSS-PLATFORM.md)** for packages, dependencies, feature coverage, and build instructions. The builds now include macOS DMG installers and Linux Debian packages. Interactive permission and hardware acceptance remains in progress; this preview is not yet a stable replacement for the Windows edition. [Download the latest tested preview artifacts](https://github.com/metalshanked/FrameForge/actions/workflows/desktop.yml). The existing Windows download above remains version 0.2.5.
 ## Everyday use
 
 1. Open FrameForge and press **Ctrl + the backtick/tilde key** (the physical key, without Shift) to capture a region.
@@ -71,6 +76,9 @@ GUI tests require an unlocked Windows desktop. Activate the test editor if Windo
 | Folder | Contents |
 |---|---|
 | `src/FrameForge` | WPF application and regression checks |
+| `src/FrameForge.Core` | Portable document, image processing, and stitching |
+| `src/FrameForge.Desktop` | Avalonia cross-platform desktop preview |
+| `tests/FrameForge.Core.Checks` | Portable regression checks |
 | `assets` | Original SVG, PNG, and multiresolution ICO |
 | `tools/IconBuilder` | Reproducible icon generator |
 | `scripts` | Build, test, and package scripts |

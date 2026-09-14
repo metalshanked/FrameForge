@@ -17,3 +17,6 @@ dotnet run --project tools/IconBuilder -- assets
 Build a release with `scripts/package.ps1` and NSIS 3.x. Test install, upgrade, tray exit, relaunch, and uninstall before distributing it. The installer supports `/TESTMODE` to place its registry entries under `HKCU\Software\FrameForge.PackageTest` and shortcuts inside the chosen installation directory; use a disposable directory under `artifacts` and keep `/D=...` last. Test mode does not change the app's data directory, so set `FRAMEFORGE_DATA` to an isolated location before running an installed test copy.
 
 Contributions are provided under the project's MIT license. Preserve third-party notices and document any new dependencies.
+## Versioning
+
+Keep the current version during feature work, bug fixes, and acceptance testing. Change it only when preparing an intentional release; do not increment versions for each edit or rebuild.

@@ -1,0 +1,66 @@
+name: Cross-platform desktop preview
+on:
+  push:
+    paths: ['src/FrameForge.Core/**', 'src/FrameForge/ShellPaths.cs', 'src/FrameForge.Desktop/**', 'tests/**', 'scripts/package-desktop.py', 'scripts/check-desktop-packages.py', 'docs/CROSS-PLATFORM.md', '.github/workflows/desktop.yml', 'licenses/**', 'THIRD-PARTY-NOTICES.md']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  desktop:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: macos-15-intel
+            rid: osx-x64
+          - os: ubuntu-24.04
+            rid: linux-x64
+          - os: ubuntu-24.04-arm
+            rid: linux-arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Linux runtime libraries
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfontconfig1 libx11-6 libice6 libsm6 python3-gi python3-gst-1.0 gir1.2-gstreamer-1.0 gir1.2-gst-plugins-base-1.0 gstreamer1.0-pipewire gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav pulseaudio-utils ffmpeg tesseract-ocr
+      - name: Portable core regression checks
+        run: dotnet run --project tests/FrameForge.Core.Checks -c Release -- artifacts/desktop-checks
+      - name: Single-instance regression checks
+        run: |
+          dotnet build tests/FrameForge.Instance.Checks -c Release
+          python tests/native/check-single-instance.py dotnet tests/FrameForge.Instance.Checks/bin/Release/net8.0/FrameForge.Instance.Checks.dll
+      - name: Package desktop preview
+        run: python scripts/package-desktop.py --rid ${{ matrix.rid }}
+      - name: Verify desktop package
+        run: python scripts/check-desktop-packages.py --rid ${{ matrix.rid }}
+      - name: Native Linux media checks
+        if: runner.os == 'Linux'
+        run: /usr/bin/python3 tests/native/check-linux-media.py
+      - name: Native macOS checks
+        if: runner.os == 'macOS'
+        run: artifacts/desktop/${{ matrix.rid }}/native/frameforge-native self-test --output artifacts/native-mac-checks
+      - name: Inspect Debian package
+        if: runner.os == 'Linux'
+        run: dpkg-deb --info dist/desktop-preview/*.deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FrameForge-desktop-${{ matrix.rid }}
+          path: |
+            dist/desktop-preview/*
+            artifacts/desktop-checks/results.txt
+            artifacts/native-*/results.txt
+            artifacts/instance-checks/results.txt
+          if-no-files-found: error
