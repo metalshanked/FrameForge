@@ -14,6 +14,7 @@
     <AvaloniaResource Include="../../assets/FrameForge.ico" Link="Assets/FrameForge.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="native/*.py" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../LICENSE" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../licenses/*.txt" Link="licenses/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

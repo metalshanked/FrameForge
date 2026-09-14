@@ -7,6 +7,7 @@ namespace FrameForge.Desktop;
 public sealed class DesktopPreferences
 {
     public bool CloseToTray { get; set; }
+    public bool StartAtLogin { get; set; }
     public bool ShortcutEnabled { get; set; }
     public string Key { get; set; } = "Tilde";
     public bool Control { get; set; } = true;

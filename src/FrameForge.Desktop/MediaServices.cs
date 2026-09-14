@@ -8,6 +8,17 @@ public static class Ocr
     public static async Task<string> Read(byte[] png,string language,CancellationToken cancel)
     {
         if(!Regex.IsMatch(language,@"^[a-zA-Z0-9_+-]{1,80}$"))throw new ArgumentException("Choose an OCR language code, such as eng.");
+        if(OperatingSystem.IsMacOS())
+        {
+            string image=System.IO.Path.Combine(AppPaths.Temp,Guid.NewGuid().ToString("N")+".png");
+            try
+            {
+                await File.WriteAllBytesAsync(image,png,cancel);
+                var result=await NativeBridge.Run("ocr",new[]{"--input",image,"--language",language},cancel);
+                return result.GetProperty("text").GetString()??"";
+            }
+            finally{if(File.Exists(image))File.Delete(image);}
+        }
         var tool=ProcessRunner.Find("tesseract","FRAMEFORGE_TESSERACT")??throw new InvalidOperationException("Install Tesseract and its language data to use offline OCR. You can also set FRAMEFORGE_TESSERACT to its executable.");
         var path=Path.Combine(AppPaths.Temp,Guid.NewGuid().ToString("N")+".png");
         try{await File.WriteAllBytesAsync(path,png,cancel);var r=await ProcessRunner.Run(tool,new[]{path,"stdout","-l",language},cancel);
@@ -15,11 +26,14 @@ public static class Ocr
         finally{if(File.Exists(path))File.Delete(path);}
     }
 }
-public sealed class Recorder : IDisposable
+public sealed class Recorder : IRecording
 {
     readonly Process process;
     readonly Task<string> errors;
     public string Path { get; }
+    public bool Paused => false;
+    public Task Pause()=>throw new NotSupportedException("Use the native Windows edition for recording pause/resume.");
+    public Task Resume()=>Pause();
     Recorder(Process p,string path){process=p;Path=path;errors=ReadLog(p.StandardError);}
     static async Task<string> ReadLog(StreamReader reader)
     {var text=new StringBuilder();var buffer=new char[4096];int count;while((count=await reader.ReadAsync(buffer))>0){text.Append(buffer,0,count);if(text.Length>16000)text.Remove(0,text.Length-16000);}return text.ToString();}
@@ -63,8 +77,21 @@ public sealed class Recorder : IDisposable
     public static async Task Convert(string source,string destination,double start,double seconds,bool gif,CancellationToken cancel)
     {
         if(!double.IsFinite(start)||start<0||!double.IsFinite(seconds)||seconds<=0)throw new ArgumentException("Enter a valid start time and duration.");
-        var args=new List<string>{"-hide_banner","-y","-ss",start.ToString(System.Globalization.CultureInfo.InvariantCulture),"-i",source,"-t",seconds.ToString(System.Globalization.CultureInfo.InvariantCulture)};
-        args.AddRange(gif?new[]{"-filter_complex","fps=12,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse"}:new[]{"-c:v","libx264","-crf","20","-c:a","aac","-movflags","+faststart"});
-        args.Add(destination);var r=await ProcessRunner.Run(Ffmpeg,args,cancel);if(r.ExitCode!=0)throw new InvalidOperationException("Video export failed. "+r.Error);
+        string temporary=System.IO.Path.Combine(System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(destination))!,".frameforge-"+Guid.NewGuid().ToString("N")+(gif?".gif":".mp4"));
+        try
+        {
+            if(OperatingSystem.IsMacOS())
+            {
+                await NativeBridge.Run("convert",new[]{"--input",source,"--output",temporary,"--start",start.ToString(System.Globalization.CultureInfo.InvariantCulture),"--duration",seconds.ToString(System.Globalization.CultureInfo.InvariantCulture),"--gif",gif?"true":"false"},cancel);
+            }
+            else
+            {
+                var args=new List<string>{"-hide_banner","-y","-ss",start.ToString(System.Globalization.CultureInfo.InvariantCulture),"-i",source,"-t",seconds.ToString(System.Globalization.CultureInfo.InvariantCulture)};
+                args.AddRange(gif?new[]{"-filter_complex","fps=12,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse"}:new[]{"-c:v","libx264","-crf","20","-c:a","aac","-movflags","+faststart"});
+                args.Add(temporary);var r=await ProcessRunner.Run(Ffmpeg,args,cancel);if(r.ExitCode!=0)throw new InvalidOperationException("Video export failed. "+r.Error);
+            }
+            cancel.ThrowIfCancellationRequested();File.Move(temporary,destination,true);
+        }
+        finally{if(File.Exists(temporary))File.Delete(temporary);}
     }
 }

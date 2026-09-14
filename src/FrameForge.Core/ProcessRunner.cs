@@ -34,6 +34,7 @@ public static class ProcessRunner
         catch(OperationCanceledException){if(!process.HasExited)process.Kill(true);await process.WaitForExitAsync();throw;}
         return new(process.ExitCode,await output,await error);
     }
+    public static void OpenFile(string path) { path=Path.GetFullPath(path); using var p=OperatingSystem.IsWindows()?Process.Start(new ProcessStartInfo(path){UseShellExecute=true}):Process.Start(new ProcessStartInfo(OperatingSystem.IsMacOS()?"/usr/bin/open":"xdg-open"){UseShellExecute=false,ArgumentList={path}}); }
     public static void OpenFolder(string path)
     {
         path=Path.GetFullPath(path);

@@ -81,6 +81,47 @@ using(var cancel=new CancellationTokenSource(150))
     bool canceled=false;try{await ProcessRunner.Run(executable,prefix.Concat(new[]{"--wait"}),cancel.Token);}catch(OperationCanceledException){canceled=true;}
     Check(canceled,"external process cancellation");
 }
+
+// Capture deletion is reversible and preserves companion pixels and unrelated exports.
+var libraryRoot=Path.Combine(root,"capture-library-"+Guid.NewGuid().ToString("N"));
+var library=new CaptureLibrary(libraryRoot);
+var capturePath=Path.Combine(library.Folder,"capture.ffg");
+var pngPath=Path.ChangeExtension(capturePath,".png");
+var unrelatedPath=Path.Combine(library.Folder,"separate-export.jpg");
+File.WriteAllBytes(capturePath,new byte[]{4,5,6});File.WriteAllBytes(pngPath,new byte[]{7,8,9});File.WriteAllBytes(unrelatedPath,new byte[]{10});
+var deleted=library.Delete(capturePath);
+Check(!File.Exists(capturePath)&&!File.Exists(pngPath),"delete removes both capture files from recent library");
+Check(File.ReadAllBytes(Path.Combine(deleted.Folder,"capture.ffg")).SequenceEqual(new byte[]{4,5,6}),"deleted project is recoverable");
+Check(File.Exists(unrelatedPath),"delete preserves unrelated exports");
+library.Restore(deleted);
+Check(File.ReadAllBytes(capturePath).SequenceEqual(new byte[]{4,5,6})&&File.ReadAllBytes(pngPath).SequenceEqual(new byte[]{7,8,9}),"undo restores project and image exactly");
+Check(!Directory.Exists(deleted.Folder),"undo cleans the empty recovery directory");
+void Refuses(Action action,string name)
+{try{action();}catch(Exception e) when(e is InvalidOperationException or IOException){Check(true,name);return;}throw new Exception("FAIL: "+name);}
+Refuses(()=>library.Delete(unrelatedPath),"delete refuses non-capture exports");
+var outsidePath=Path.Combine(libraryRoot,"outside.ffg");File.WriteAllText(outsidePath,"outside");
+Refuses(()=>library.Delete(outsidePath),"delete refuses a project outside this library");
+deleted=library.Delete(capturePath);File.WriteAllText(capturePath,"new capture");
+Refuses(()=>library.Restore(deleted),"undo refuses to overwrite a newer file");
+Check(File.ReadAllText(capturePath)=="new capture","undo conflict preserves the newer capture");
+File.Delete(capturePath);library.Restore(deleted);
+var recordingPath=Path.Combine(library.Folder,"recording.mp4");File.WriteAllBytes(recordingPath,new byte[]{11,12});
+var deletedVideo=library.Delete(recordingPath);library.Restore(deletedVideo);
+Check(File.ReadAllBytes(recordingPath).SequenceEqual(new byte[]{11,12}),"recordings without previews support delete and undo");
+Refuses(()=>library.Restore(new DeletedCapture(libraryRoot,new[]{"../outside.ffg"})),"undo rejects recovery paths outside its directory");
+
+var reversed=new Mark{Kind=Tool.Arrow,X=80,Y=90,X2=20,Y2=30};
+var resized=reversed.Clone();AnnotationGeometry.Resize(resized,reversed,new SKRect(10,20,130,140));
+Check(resized.X==130&&resized.Y==140&&resized.X2==10&&resized.Y2==20,"resize preserves reversed arrow direction");
+var pen=new Mark{Kind=Tool.Pen,X=10,Y=10,X2=30,Y2=30,Points=new(){new[]{10d,10d},new[]{20d,25d},new[]{30d,30d}}};
+var resizedPen=pen.Clone();AnnotationGeometry.Resize(resizedPen,pen,new SKRect(0,0,40,60));
+Check(resizedPen.Points[1][0]==20&&resizedPen.Points[1][1]==45,"resize scales freehand points with their bounds");
+Check(pen.Points[1][0]==20&&pen.Points[1][1]==25,"resize keeps the gesture's source geometry unchanged");
+var textMark=new Mark{Kind=Tool.Text,X=0,Y=0,X2=100,Y2=50,FontSize=20};
+var biggerText=textMark.Clone();AnnotationGeometry.Resize(biggerText,textMark,new SKRect(0,0,200,100));
+Check(biggerText.FontSize==40,"text size follows annotation resize");
+AnnotationGeometry.Resize(biggerText,textMark,new SKRect(0,0,1,1));
+Check(biggerText.FontSize==40,"collapsed resize does not corrupt the annotation");
 Console.WriteLine($"{passed} checks passed.");
 File.WriteAllText(Path.Combine(root,"results.txt"),$"{passed} checks passed on {System.Runtime.InteropServices.RuntimeInformation.OSDescription} ({System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture}).\n");
 return 0;

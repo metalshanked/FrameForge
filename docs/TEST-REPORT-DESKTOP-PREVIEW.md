@@ -1,28 +1,33 @@
 # Desktop preview verification
 
-Version: 0.3.0-preview.1. This report applies to the new Avalonia application, not the existing Windows WPF release.
+Version: **0.3.0-preview.1**, unchanged during this development cycle. This report applies to the Avalonia app; the existing Windows WPF installer is separate.
 
-## Completed checks
+## Current development checks
 
-- **52 shared-core regression checks on Windows x64** and **52 on Ubuntu 26.04 x64 under WSL**. Coverage includes version-1 project loading/saving, all annotation renderers, undo/redo, opaque redaction including fractional pixel boundaries, crop/resize/rotation, PNG/JPEG/WebP export, malformed input, downward scrolling overlap, duplicate/incompatible frames, atomic file writes, literal process arguments and cancellation.
-- The WSL environment lacked ICU. An Ubuntu libicu78 package was extracted under the project's ignored .local/linux-deps folder and supplied through LD_LIBRARY_PATH for these checks. The Debian app packages declare ICU as a dependency. This was not a full Linux desktop GUI test.
-- Windows packaged-app UI: launch, flat control layout, Escape cancellation back to the editor, completed region capture, automatic native clipboard copy, paste with identical source PNG bytes and unchanged 262 × 175 dimensions, arrow drawing, and normal Exit with project persistence.
-- The region selector has a visible Cancel/Escape control and taskbar entry. Focus loss and a two-minute timeout also cancel it; the latter paths are implemented but were not independently timed in the final UI smoke test.
-- Dependency audit of the desktop application, including transitive dependencies, returned no known vulnerable packages. Uses Tmds.DBus 0.95.1 rather than the earlier vulnerable version found during initial restore.
-- Compiled using the project-local .NET 10 SDK with no compiler warnings in the final publish runs. The shipped runtime target remains .NET 8.
+- **68 shared-core checks passed on Windows x64.** Coverage includes project persistence, annotations, undo/redo, redaction, image transforms/export, scrolling overlap and rejection, atomic writes, process cancellation/literal arguments, recoverable capture deletion, restoration conflicts/path boundaries, and annotation resizing.
+- The updated desktop app builds with **zero warnings and zero errors** using .NET 10 SDK, targeting .NET 8.
+- **7 native Linux media checks passed on Ubuntu 26.04 x64 under WSL.** A synthetic source exercised H.264 MP4 recording, mixed stereo AAC audio, pause/resume, finalized output, full playback decoding, and refusal to overwrite an existing recording. These checks do not capture a real screen or test portal consent.
+- Ubuntu runtime/media dependencies were installed through its package manager. The project is accessed by a temporary mount of Y:/frameforge; source and app/test artifacts remain under that project folder.
+- Current Mac native helper compilation, OCR/media checks, updated package verification, and full interactive acceptance are pending. Do not treat the older CI result below as evidence for the newly added native helpers.
 
-- **Native GitHub CI passed on all five targets:** Windows x64, macOS Apple Silicon and Intel, and Ubuntu 24.04 x64 and ARM64. Each runner executed the 52 shared-core checks, built its self-contained package, and verified the archive. Both Linux runners also inspected their Debian package metadata.
-- [Verified CI run](https://github.com/metalshanked/FrameForge/actions/runs/34798123097), source commit 1a4d4d0c2aa5e9b161bcf77b925cbdd473a1b91a. The initial Linux ARM64 run exposed an upstream SkiaSharp native startup failure; the pinned 3.119.4 dependency passed the native rerun. See [upstream fix](https://github.com/mono/SkiaSharp/pull/3494).
-- **90 package checks passed** across the five target archives in native CI. These verify archive integrity, checksums, executable architecture, runtime target, notices, macOS bundle metadata/icon, executable permissions, and exclusion of development/user files.
+## Earlier preview baseline
 
-## Packages and remaining acceptance
+The earlier preview passed 52 shared checks on Windows and WSL, Windows UI smoke checks for launch/region capture/Escape/clipboard/annotation/exit, and an application dependency audit. All five native GitHub targets passed shared checks and packaging at source commit 1a4d4d0c2aa5e9b161bcf77b925cbdd473a1b91a:
 
-The packaging verifier checks each runtime archive's checksum, executable architecture, licenses, runtime configuration and exclusion of personal/development data. It also checks macOS bundle metadata/icon and Unix executable permissions. Debian packages are additionally inspected with Ubuntu's package tools. Package verification results are written to dist/desktop-preview/PACKAGE-CHECKS.txt.
+[Earlier CI run](https://github.com/metalshanked/FrameForge/actions/runs/34798123097)
 
-macOS GUI launch, Screen Recording permissions, native selector behavior and hotkeys have **not** been tested on a Mac. Linux portal screenshots, global shortcuts, tray behavior, recording, and distribution-specific GUI dependencies still require testing on the user's Linux desktop. Intel/ARM64 binaries being present is not proof of hardware compatibility.
+Those checks predate native recording/audio, automatic scrolling, recoverable library deletion, resize handles, and sign-in startup. They are retained as baseline history only.
 
-The workflow in .github/workflows/desktop.yml runs native builds, shared-core checks and package verification. The successful run linked above does not exercise interactive screen capture or OS permission dialogs.
+## Current validation workflow
 
-Video-only recording, OCR, and video conversion are implemented in the preview but were not exercised end-to-end in this UI smoke test. Their native acceptance steps and current feature gaps are listed in CROSS-PLATFORM.md. There is no claim of full feature parity or production readiness.
+The workflow builds Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. It runs shared core checks, packages each target, verifies checksums/architecture/runtime/notices, and verifies the native helpers. Mac packages include an ad-hoc signed app and a DMG; they are not Developer ID signed or notarized. Linux package checks include Debian metadata and media dependencies.
 
-All development files, packages, test captures and tool dependencies created for this work remain under Y:/frameforge. The temporary WSL mount aliases the same network share; it does not copy the project elsewhere. Test screenshots and generated projects are excluded from Git.
+Synthetic Linux media checks use GStreamer test sources. Synthetic Mac checks exercise local Vision OCR, video timestamp handling across a pause, MP4 decoding metadata, trimming, and animated GIF conversion. Neither substitutes for screen permissions or physical audio/display checks.
+
+## Remaining desktop acceptance
+
+The checklist in CROSS-PLATFORM.md covers packaged launch, screen/window/region capture, cancellation and permission denial, clipboard, shortcuts, tray/startup, capture deletion/restoration, recording with real audio sources, automatic scrolling, OCR languages, and mixed display scaling.
+
+WSLg is a valid local Linux UI/media environment, but its portal capabilities differ from a normal Linux desktop. ScreenCast, RemoteDesktop pointer control, and GlobalShortcuts still require a compatible desktop session. macOS interactive acceptance requires access to the user's Mac and approval of its system permission prompts.
+
+No production readiness or full feature parity is claimed before those checks pass. Test screenshots, recordings, projects, and machine-specific data are excluded from Git.

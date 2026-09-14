@@ -23,6 +23,8 @@ public sealed class App : Application
         Styles.Add(new Style(s=>s.Is<Button>().Class(":pressed")){Setters={
             new Setter(Button.BackgroundProperty,Brush.Parse("#D8CFF4")),
             new Setter(Button.BorderBrushProperty,Brush.Parse("#7561B8"))}});
+        Styles.Add(new Style(s=>s.Is<ScrollBar>().Class(":vertical")){Setters={new Setter(ScrollBar.WidthProperty,6d),new Setter(ScrollBar.MinWidthProperty,0d)}});
+        Styles.Add(new Style(s=>s.Is<ScrollBar>().Class(":horizontal")){Setters={new Setter(ScrollBar.HeightProperty,6d),new Setter(ScrollBar.MinHeightProperty,0d)}});
         Styles.Add(new Style(s=>s.Is<ToggleButton>().Class(":checked")){Setters={
             new Setter(Button.BackgroundProperty,Brush.Parse("#6757EF")),
             new Setter(Button.ForegroundProperty,Brushes.White)}});

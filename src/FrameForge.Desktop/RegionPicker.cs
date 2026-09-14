@@ -37,6 +37,22 @@ public sealed class RegionPicker : Window
         try{cancel.ThrowIfCancellationRequested();picker.Show();CaptureTrace.Write("region window shown");return await picker.result.Task;}
         finally{picker.timeout.Stop();picker.active=false;picker.Close();}
     }
+    public static async Task<SKRect?> PickImage(Window owner,SKBitmap image)
+    {
+        var bitmap=new Bitmap(new MemoryStream(Imaging.Png(image)));
+        double scale=Math.Min(900.0/image.Width,500.0/image.Height);
+        var area=new Grid{Width=image.Width*scale,Height=image.Height*scale};
+        area.Children.Add(new Image{Source=bitmap,Stretch=Stretch.Fill});
+        SKRect? result=null;
+        var content=new StackPanel{Spacing=12,Margin=new Thickness(20)};
+        content.Children.Add(new TextBlock{Text="Select only the scrolling content. Exclude fixed headers and sidebars.",TextWrapping=TextWrapping.Wrap});
+        content.Children.Add(area);
+        var dialog=new Window{Title="FrameForge · Select scrolling area",Width=area.Width+40,Height=area.Height+140,Content=content,CanResize=false,WindowStartupLocation=WindowStartupLocation.CenterOwner};
+        var selector=new Selector(image.Width,image.Height,r=>{result=r;dialog.Close();});area.Children.Add(selector);
+        var cancel=new Button{Content="Cancel · Escape",HorizontalAlignment=Avalonia.Layout.HorizontalAlignment.Right};cancel.Click+=(_,_)=>dialog.Close();content.Children.Add(cancel);
+        dialog.KeyDown+=(_,e)=>{if(e.Key==Key.Escape)dialog.Close();};
+        try{await dialog.ShowDialog(owner);return result;}finally{bitmap.Dispose();}
+    }
     sealed class Selector : Control
     {
         readonly int width,height;readonly Action<SKRect?> complete;Point start,current;bool selecting;

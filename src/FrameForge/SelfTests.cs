@@ -34,6 +34,7 @@ public static class SelfTests
         {
             var sample = MainWindow.DemoImage();
             ShellPathTests();
+            LibraryDeletionTests();
             ShortcutTests();
             DesktopPreferenceTests();
             OutlineTest();
@@ -182,6 +183,54 @@ public static class SelfTests
         }
     }
 
+    static void LibraryDeletionTests()
+    {
+        string? previousData = Environment.GetEnvironmentVariable("FRAMEFORGE_DATA");
+        Environment.SetEnvironmentVariable("FRAMEFORGE_DATA", Path.Combine(folder, "deletion-fixtures"));
+        try
+        {
+            Directory.CreateDirectory(Paths.Library);
+            string project = Path.Combine(Paths.Library, Paths.Unique(".ffg"));
+            string png = Path.ChangeExtension(project, ".png");
+            string unrelated = Path.ChangeExtension(project, ".jpg");
+            File.WriteAllText(project, "editable capture");
+            File.WriteAllText(png, "paired image");
+            File.WriteAllText(unrelated, "separate export");
+            var deleted = CaptureLibrary.Delete(project);
+            Check("Deleting a capture moves its project and image together", !File.Exists(project) && !File.Exists(png)
+                && File.ReadAllText(Path.Combine(deleted.Directory, Path.GetFileName(project))) == "editable capture");
+            Check("Capture deletion preserves unrelated exports", File.ReadAllText(unrelated) == "separate export");
+            CaptureLibrary.Restore(deleted);
+            Check("Undo restores both capture files exactly", File.ReadAllText(project) == "editable capture" && File.ReadAllText(png) == "paired image");
+            Check("Undo removes the empty deleted capture folder", !Directory.Exists(deleted.Directory));
+            using (var locked = new FileStream(png, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                try { CaptureLibrary.Delete(project); Check("Locked companion prevents partial deletion", false); }
+                catch (IOException) { Check("Locked companion prevents partial deletion", File.Exists(project) && File.Exists(png)); }
+            }
+            deleted = CaptureLibrary.Delete(project);
+            File.WriteAllText(png, "new image");
+            try { CaptureLibrary.Restore(deleted); Check("Undo never overwrites a new file", false); }
+            catch (IOException) { Check("Undo never overwrites a new file", File.ReadAllText(png) == "new image" && !File.Exists(project)
+                && File.Exists(Path.Combine(deleted.Directory, Path.GetFileName(project)))); }
+            File.Delete(png); // Only the synthetic conflict fixture created immediately above.
+            CaptureLibrary.Restore(deleted);
+            string outside = Path.Combine(folder, "outside-library.ffg");
+            File.WriteAllText(outside, "keep");
+            try { CaptureLibrary.Delete(outside); Check("Deletion refuses paths outside the capture library", false); }
+            catch (InvalidOperationException) { Check("Deletion refuses paths outside the capture library", File.ReadAllText(outside) == "keep"); }
+            try { CaptureLibrary.Delete(unrelated); Check("Deletion refuses non-capture files", false); }
+            catch (InvalidOperationException) { Check("Deletion refuses non-capture files", File.Exists(unrelated)); }
+            string video = Path.Combine(Paths.Library, Paths.Unique(".mp4"));
+            File.WriteAllText(video, "video fixture");
+            var deletedVideo = CaptureLibrary.Delete(video);
+            CaptureLibrary.Restore(deletedVideo);
+            Check("Recordings without a thumbnail can be deleted and restored", File.ReadAllText(video) == "video fixture");
+        }
+        finally { Environment.SetEnvironmentVariable("FRAMEFORGE_DATA", previousData); }
+    }
+
+
     static BitmapSource Pattern(int w, int h, int seed)
     {
         var bytes = new byte[w * h * 4];
@@ -281,6 +330,8 @@ public static class SelfTests
         Check("Window enumeration finds app", NativeCapture.Windows().Any(a => a.Handle == handle));
         await PickerRegressionTests(w, bounds);
         await CaptureClipboardTests(w, handle);
+        await LibraryDeletionUiTests(w);
+        await CaptureForegroundTests(w, handle);
         await Task.Delay(200);
         try
         {
@@ -348,6 +399,33 @@ public static class SelfTests
         Check("Cancelled capture preserves clipboard and the open image", selectorOpened && afterCancel != null
             && window.Editor.Document?.Title == "Auto-copy test"
             && Imaging.Png(Imaging.Normalize(afterCancel)).SequenceEqual(Imaging.Png(Imaging.Normalize(captured))));
+    }
+
+    static async Task LibraryDeletionUiTests(MainWindow window)
+    {
+        window.OpenCapture(Pattern(240, 160, 161), "Delete and undo fixture");
+        string path = window.Editor.Document!.ProjectPath!;
+        bool deleted = window.DeleteSavedCapture(path, "Delete and undo fixture");
+        await Task.Delay(1400);
+        Check("Deleting the open capture clears the editor and cannot autosave it back", deleted
+            && window.Editor.Document == null && !File.Exists(path) && !File.Exists(Path.ChangeExtension(path, ".png")));
+        Check("Recent capture deletion exposes an Undo action", Button(window, "Undo delete").IsVisible);
+        window.UndoDeleteCapture();
+        Check("Undo deletion restores the open editable capture", window.Editor.Document?.Title == "Delete and undo fixture"
+            && window.Editor.Document.Image.PixelWidth == 240 && File.Exists(path) && File.Exists(Path.ChangeExtension(path, ".png")));
+    }
+
+    static async Task CaptureForegroundTests(MainWindow window, IntPtr handle)
+    {
+        window.WindowState = WindowState.Maximized;
+        window.HideToTray();
+        await window.Capture("screen");
+        Check("Capture from tray brings the editor to the foreground", window.IsVisible && NativeCapture.GetForegroundWindow() == handle);
+        Check("Capture preserves a maximized editor without leaving it topmost", window.WindowState == WindowState.Maximized && !window.Topmost);
+        window.WindowState = WindowState.Minimized;
+        await window.Capture("screen");
+        Check("Capture restores a minimized editor and focuses it", window.WindowState != WindowState.Minimized && window.IsVisible
+            && NativeCapture.GetForegroundWindow() == handle);
     }
 
     static void DesktopPreferenceTests()

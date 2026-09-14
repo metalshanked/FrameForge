@@ -18,5 +18,5 @@ Get-ChildItem -LiteralPath (Join-Path $projectRoot 'dist') -File -Filter '*.exe'
 $portable = Join-Path $projectRoot 'dist\portable\FrameForge.exe'
 $portableHash = (Get-FileHash -LiteralPath $portable -Algorithm SHA256).Hash
 Set-Content -LiteralPath ($portable + '.sha256') -Value ($portableHash + '  FrameForge.exe') -Encoding ascii
-Write-Output "Installer: $projectRoot\dist\FrameForge-Setup-0.2.5.exe"
+Write-Output "Installer: $projectRoot\dist\FrameForge-Setup-0.2.6.exe"
 Write-Output "Portable: $portable"

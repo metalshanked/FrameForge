@@ -14,6 +14,6 @@ dist/
 .env.*
 !.env.example
 
-# Python packaging caches
+# Python helper caches
 __pycache__/
 *.py[cod]
