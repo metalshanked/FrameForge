@@ -16,7 +16,7 @@ The self-contained runtime may contain additional third-party components describ
 The Avalonia desktop preview additionally redistributes:
 
 - **Avalonia 12.1.2** (including its desktop backends, Fluent theme, and remote protocol), MIT. License: licenses/Avalonia.txt. Source: https://github.com/AvaloniaUI/Avalonia.
-- **SkiaSharp 3.119.0** and its native assets, MIT plus the bundled third-party notices. See licenses/SkiaSharp.txt and licenses/SkiaSharp-third-party.txt. Source: https://github.com/mono/SkiaSharp.
+- **SkiaSharp 3.119.4** and its native assets, MIT plus the bundled third-party notices. See licenses/SkiaSharp.txt and licenses/SkiaSharp-third-party.txt. Source: https://github.com/mono/SkiaSharp.
 - **HarfBuzzSharp 8.3.1.3**, including native assets. See licenses/HarfBuzzSharp.txt and licenses/HarfBuzzSharp-third-party.txt. Source: https://github.com/mono/SkiaSharp and https://github.com/harfbuzz/harfbuzz.
 - **Tmds.DBus 0.95.1**, MIT. See licenses/Tmds.DBus.txt. Source: https://github.com/tmds/Tmds.DBus.
 - **MicroCom.Runtime 0.11.6**, MIT. See licenses/MicroCom.txt. Source: https://github.com/kekekeks/MicroCom.

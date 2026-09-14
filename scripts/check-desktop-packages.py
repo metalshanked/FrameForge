@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """Verify package integrity, target architecture, bundle metadata, permissions, and notices."""
-import hashlib, io, json, pathlib, plistlib, struct, tarfile, zipfile
+import argparse, hashlib, io, json, pathlib, plistlib, struct, tarfile, zipfile
 ROOT=pathlib.Path(__file__).resolve().parents[1]
 OUT=ROOT/"dist/desktop-preview"
 VERSION="0.3.0-preview.1"
+RIDS=("win-x64","osx-arm64","osx-x64","linux-x64","linux-arm64")
+parser=argparse.ArgumentParser()
+parser.add_argument("--rid", choices=RIDS)
+options=parser.parse_args()
 checks=0
 def check(value,description):
     global checks
     if not value: raise RuntimeError(description)
     checks+=1
-for rid in ("win-x64","osx-arm64","osx-x64","linux-x64","linux-arm64"):
+for rid in ((options.rid,) if options.rid else RIDS):
     extension=".zip" if rid.startswith("win") else ".tar.gz"
     path=OUT/f"FrameForge-Desktop-{VERSION}-{rid}{extension}"
     with path.open("rb") as stream: digest=hashlib.file_digest(stream,"sha256").hexdigest()
@@ -50,4 +54,4 @@ for rid in ("win-x64","osx-arm64","osx-x64","linux-x64","linux-arm64"):
         with deb.open("rb") as stream: digest=hashlib.file_digest(stream,"sha256").hexdigest()
         check(deb.with_suffix(".deb.sha256").read_text().split()[0]==digest,rid+" Debian checksum")
 print(f"{checks} package checks passed.")
-(OUT/"PACKAGE-CHECKS.txt").write_text(f"{checks} package checks passed: archive integrity, executable architecture, runtime target, licenses, bundle identity and executable permissions. Native GUI acceptance is separate.\n")
+(OUT/(f"PACKAGE-CHECKS-{options.rid}.txt" if options.rid else "PACKAGE-CHECKS.txt")).write_text(f"{checks} package checks passed: archive integrity, executable architecture, runtime target, licenses, bundle identity and executable permissions. Native GUI acceptance is separate.\n")

@@ -2,6 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup><PackageReference Include="SkiaSharp" Version="3.119.0" /></ItemGroup>
+  <ItemGroup><PackageReference Include="SkiaSharp" Version="3.119.4" /><PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" /></ItemGroup>
   <ItemGroup><Compile Include="../FrameForge/ShellPaths.cs" Link="Platform/WindowsShellPaths.cs" /></ItemGroup>
 </Project>
