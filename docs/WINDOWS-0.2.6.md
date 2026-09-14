@@ -8,4 +8,4 @@ This update applies to the native Windows app and installer.
 - Right-click **Open capture folder → Open deleted captures** to recover earlier deleted files or remove them permanently in File Explorer. Deleted files continue to use disk space until removed.
 - Completed captures show and raise the editor, restore a minimized window, preserve maximized layout, and keep automatic clipboard copy. The editor is not left permanently on top of other apps.
 
-The installer upgrades the existing per-user installation and preserves the capture library and preferences. Package output is `dist/FrameForge-Setup-0.2.6.exe`; a portable executable is in `dist/portable/FrameForge.exe`. Public release links are updated when this installer is published.
+The installer upgrades the existing per-user installation and preserves the capture library and preferences. Package output is `dist/FrameForge-Setup-0.2.6.exe`; a portable executable is in `dist/portable/FrameForge.exe`. Download the installer, portable app, and checksums from the [Windows 0.2.6 release](https://github.com/metalshanked/FrameForge/releases/tag/v0.2.6).

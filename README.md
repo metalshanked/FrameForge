@@ -2,17 +2,17 @@
 
 <img src="assets/FrameForge.png" alt="FrameForge icon" width="80">
 
-A native Windows screen capture and annotation app, released under the **MIT license**. Version **0.2.5**.
+An independent screen capture and annotation app under the **MIT license**. **Windows 0.2.6** is available now, with **macOS and Linux 0.3.0-preview.1** packages.
 
 Capture a region, window, desktop, or scrolling area; annotate images; record video; and extract text locally with Windows OCR. FrameForge is an independently developed project.
 
 ## Run the app
 
-Download **[FrameForge 0.2.5 for Windows](https://github.com/metalshanked/FrameForge/releases/tag/v0.2.5)**:
+Download **[FrameForge 0.2.6 for Windows](https://github.com/metalshanked/FrameForge/releases/tag/v0.2.6)**:
 
-- **[Windows installer (recommended)](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/FrameForge-Setup-0.2.5.exe)** — installs for your Windows account, creates Start-menu shortcuts, and includes an uninstaller. Desktop and sign-in shortcuts are optional. Choose the installation directory during setup.
-- **[Portable EXE](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/FrameForge-Portable-0.2.5.exe)** — run directly without installing the app; no separate .NET installation is needed.
-- **[SHA256 checksums](https://github.com/metalshanked/FrameForge/releases/download/v0.2.5/SHA256SUMS.txt)** — verify the downloaded files.
+- **[Windows installer (recommended)](https://github.com/metalshanked/FrameForge/releases/download/v0.2.6/FrameForge-Setup-0.2.6.exe)** — installs for your Windows account, creates Start-menu shortcuts, and includes an uninstaller. Desktop and sign-in shortcuts are optional. Choose the installation directory during setup.
+- **[Portable EXE](https://github.com/metalshanked/FrameForge/releases/download/v0.2.6/FrameForge-Portable-0.2.6.exe)** — run directly without installing the app; no separate .NET installation is needed.
+- **[SHA256 checksums](https://github.com/metalshanked/FrameForge/releases/download/v0.2.6/SHA256SUMS.txt)** — verify the downloaded files.
 
 Dependency licenses are available inside **Preferences → Open-source licenses**. Locally built packages are written to `dist/`.
 
@@ -24,9 +24,23 @@ Recording, trimming, and GIF export need a separately installed **FFmpeg**. Set 
 
 ## Cross-platform desktop preview
 
-A separate **0.3.0-preview.1** desktop edition is being developed for Windows, macOS (Apple Silicon and Intel), and Linux (x64 and ARM64). It includes a shared editor with annotation resizing, native/portal screenshots, clipboard support, automatic and manual scrolling, native Mac/Linux recording with audio and pause/resume, offline OCR, recoverable capture deletion, and configurable shortcuts.
+A separate **0.3.0-preview.1** desktop edition is available for macOS (Apple Silicon and Intel), Linux (x64 and ARM64), and Windows. It includes a shared editor with annotation resizing, native/portal screenshots, clipboard support, automatic and manual scrolling, native Mac/Linux recording with audio and pause/resume, offline OCR, recoverable capture deletion, and configurable shortcuts.
 
-See the **[preview guide and platform acceptance checklist](docs/CROSS-PLATFORM.md)** for packages, dependencies, feature coverage, and build instructions. The builds now include macOS DMG installers and Linux Debian packages. Interactive permission and hardware acceptance remains in progress; this preview is not yet a stable replacement for the Windows edition. [Download the latest tested preview artifacts](https://github.com/metalshanked/FrameForge/actions/workflows/desktop.yml). The existing Windows download above remains version 0.2.5.
+Download the **[macOS and Linux preview release](https://github.com/metalshanked/FrameForge/releases/tag/v0.3.0-preview.1)**:
+
+| Platform | Installer |
+|---|---|
+| macOS 14+, Apple Silicon | [Apple Silicon DMG](https://github.com/metalshanked/FrameForge/releases/download/v0.3.0-preview.1/FrameForge-Desktop-0.3.0-preview.1-osx-arm64.dmg) |
+| macOS 14+, Intel | [Intel DMG](https://github.com/metalshanked/FrameForge/releases/download/v0.3.0-preview.1/FrameForge-Desktop-0.3.0-preview.1-osx-x64.dmg) |
+| Debian/Ubuntu, x64 | [x64 Debian package](https://github.com/metalshanked/FrameForge/releases/download/v0.3.0-preview.1/FrameForge-Desktop-0.3.0-preview.1-linux-x64.deb) |
+| Debian/Ubuntu, ARM64 | [ARM64 Debian package](https://github.com/metalshanked/FrameForge/releases/download/v0.3.0-preview.1/FrameForge-Desktop-0.3.0-preview.1-linux-arm64.deb) |
+
+Portable archives, an experimental Windows desktop port, [checksums](https://github.com/metalshanked/FrameForge/releases/download/v0.3.0-preview.1/SHA256SUMS.txt), and build provenance are included on the release page. The .NET runtime is bundled.
+
+**These are preview packages.** Mac builds are ad-hoc signed and not notarized; updating the app can require renewed screen-capture permission. Linux needs a compatible desktop portal, and native desktop capture has not been fully validated in GNOME/KDE. WSLg testing does not establish full Linux capture support. The native Windows installer above remains the recommended Windows edition.
+
+See the **[preview guide](docs/CROSS-PLATFORM.md)** for installation, dependencies, and feature coverage, and the **[verification report](docs/TEST-REPORT-DESKTOP-PREVIEW.md)** for completed checks and remaining acceptance work.
+
 ## Everyday use
 
 1. Open FrameForge and press **Ctrl + the backtick/tilde key** (the physical key, without Shift) to capture a region.
@@ -81,7 +95,8 @@ GUI tests require an unlocked Windows desktop. Activate the test editor if Windo
 | `tests/FrameForge.Core.Checks` | Portable regression checks |
 | `assets` | Original SVG, PNG, and multiresolution ICO |
 | `tools/IconBuilder` | Reproducible icon generator |
-| `scripts` | Build, test, and package scripts |
+| `scripts` | Build, test, package, and release-draft scripts |
+| `releases` | Pinned build provenance for preview packages |
 | `packaging` | NSIS installer source |
 | `docs` | User guide and verification notes |
 | `licenses` | Dependency licenses |
