@@ -24,7 +24,7 @@ Section: graphics
 Priority: optional
 Architecture: {arch}
 Maintainer: FrameForge contributors <57646596+metalshanked@users.noreply.github.com>
-Depends: libc6 (>= 2.28), libgcc-s1, libgssapi-krb5-2, libstdc++6, zlib1g, libx11-6, libice6, libsm6, libfontconfig1, libssl3 | libssl3t64, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, xdg-desktop-portal, python3, python3-gi, python3-gst-1.0, gir1.2-gstreamer-1.0, gir1.2-gst-plugins-base-1.0, gstreamer1.0-pipewire, gstreamer1.0-plugins-base, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad, gstreamer1.0-plugins-ugly, gstreamer1.0-libav, pulseaudio-utils, ffmpeg, tesseract-ocr, tesseract-ocr-eng
+Depends: libc6 (>= 2.28), libgcc-s1, libgssapi-krb5-2, libstdc++6, zlib1g, libx11-6, libice6, libsm6, libfontconfig1, libssl3 | libssl3t64, libicu70 | libicu72 | libicu74 | libicu76 | libicu78, xdg-utils, xdg-desktop-portal, python3, python3-gi, python3-gst-1.0, gir1.2-gstreamer-1.0, gir1.2-gst-plugins-base-1.0, gstreamer1.0-pipewire, gstreamer1.0-plugins-base, gstreamer1.0-plugins-good, gstreamer1.0-plugins-bad, gstreamer1.0-plugins-ugly, gstreamer1.0-libav, pulseaudio-utils, ffmpeg, tesseract-ocr, tesseract-ocr-eng
 Recommends: xdg-desktop-portal-gtk
 Description: FrameForge screen capture and annotation
  Local screen capture, annotation, scrolling image stitching, video recording,

@@ -69,9 +69,9 @@ public sealed partial class MainWindow : Window
         var sidebar=new DockPanel{Width=218,Margin=new Thickness(0,0,16,0)};
         var settings=new StackPanel{Spacing=8,Margin=new Thickness(0,14,0,0)};
         settings.Children.Add(Button("Preferences & shortcut…",()=>Run(Preferences)));
-        var openFolder=Button("Open capture folder",()=>Run(()=>{SaveCurrent();ProcessRunner.OpenFolder(AppPaths.Library);return Task.CompletedTask;}));
+        var openFolder=Button("Open capture folder",()=>Run(async()=>{SaveCurrent();await ProcessRunner.OpenFolder(AppPaths.Library);status.Text="Opened the capture folder.";}));
         ToolTip.SetTip(openFolder,"Open saved projects, screenshots, and recordings in your file manager.");
-        var deletedFolder=new MenuItem{Header="Open deleted captures"};deletedFolder.Click+=(_,_)=>Run(()=>{Directory.CreateDirectory(library.DeletedFolder);ProcessRunner.OpenFolder(library.DeletedFolder);return Task.CompletedTask;});
+        var deletedFolder=new MenuItem{Header="Open deleted captures"};deletedFolder.Click+=(_,_)=>Run(async()=>{Directory.CreateDirectory(library.DeletedFolder);await ProcessRunner.OpenFolder(library.DeletedFolder);});
         openFolder.ContextMenu=new ContextMenu{ItemsSource=new[]{deletedFolder}};settings.Children.Add(openFolder);
         settings.Children.Add(Button("Exit FrameForge",()=>Run(Exit)));
         DockPanel.SetDock(settings,Dock.Bottom);sidebar.Children.Add(settings);
@@ -134,7 +134,11 @@ public sealed partial class MainWindow : Window
         stroke.ValueChanged+=(_,_)=>editor.Stroke=(double)(stroke.Value??4);font.ValueChanged+=(_,_)=>editor.FontSize=(double)(font.Value??26);
         fill.IsCheckedChanged+=(_,_)=>editor.Filled=fill.IsChecked==true;
         Closing+=(_,e)=>{if(quitting)return;e.Cancel=true;if(busy){operation?.Cancel();status.Text="Canceling the current operation. Close again when it finishes.";return;}if(preferences.CloseToTray&&tray!=null){Run(()=>{SaveCurrent();Hide();return Task.CompletedTask;});}else Run(Exit);};
-        Opened+=(_,_)=>{SetupTray();LoadRecent();if(preferences.ShortcutEnabled)Run(ApplyShortcut);if(Environment.GetCommandLineArgs().Contains("--background")&&tray!=null)Hide();};
+        Opened+=(_,_)=>{SetupTray();LoadRecent();Run(async()=>{
+            if(preferences.ShortcutEnabled){try{await ApplyShortcut();}catch(Exception error){status.Text=error.Message;}}
+            if(Environment.GetCommandLineArgs().Contains("--capture"))await Capture(true);
+            else if(Environment.GetCommandLineArgs().Contains("--background")&&tray!=null)Hide();
+        });};
         SingleInstance.Requested+=capture=>Dispatcher.UIThread.Post(()=>{DesktopIntegration.Show(this);if(capture)Run(()=>Capture(true));});
         KeyDown+=(_,e)=>
         {
@@ -270,11 +274,10 @@ public sealed partial class MainWindow : Window
             card.ContextMenu=new ContextMenu{ItemsSource=new[]{openMenu,deleteMenu}};recent.Children.Add(card);
         }
     }
-    Task OpenRecent(string path)
+    async Task OpenRecent(string path)
     {
         if(System.IO.Path.GetExtension(path)==".ffg"){SaveCurrent();SetDocument(CaptureDocument.Load(path),path);}
-        else ProcessRunner.OpenFile(path);
-        return Task.CompletedTask;
+        else await ProcessRunner.OpenFile(path);
     }
     Task DeleteCapture(string path)
     {
@@ -318,6 +321,7 @@ public sealed partial class MainWindow : Window
         }
         else
         {
+            if(OperatingSystem.IsLinux())await NativeBridge.Run("portal-check",Array.Empty<string>(),Token);
             var options=await RecordingOptions();if(options==null)return;
             Hide();try{await Task.Delay(350,Token);recorder=await NativeRecording.Start(options.Value.Source,options.Value.Audio,options.Value.Cursor,Token);}finally{DesktopIntegration.Show(this);}
         }

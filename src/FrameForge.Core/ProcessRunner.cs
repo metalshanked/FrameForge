@@ -34,11 +34,39 @@ public static class ProcessRunner
         catch(OperationCanceledException){if(!process.HasExited)process.Kill(true);await process.WaitForExitAsync();throw;}
         return new(process.ExitCode,await output,await error);
     }
-    public static void OpenFile(string path) { path=Path.GetFullPath(path); using var p=OperatingSystem.IsWindows()?Process.Start(new ProcessStartInfo(path){UseShellExecute=true}):Process.Start(new ProcessStartInfo(OperatingSystem.IsMacOS()?"/usr/bin/open":"xdg-open"){UseShellExecute=false,ArgumentList={path}}); }
-    public static void OpenFolder(string path)
+    public static Task OpenFile(string path)=>OpenPath(path,false);
+    public static Task OpenFolder(string path)=>OpenPath(path,true);
+    static async Task OpenPath(string path,bool folder)
     {
         path=Path.GetFullPath(path);
-        if(OperatingSystem.IsWindows())global::FrameForge.ShellPaths.OpenFolder(path);
-        else Process.Start(new ProcessStartInfo(OperatingSystem.IsMacOS()?"/usr/bin/open":"xdg-open"){UseShellExecute=false,ArgumentList={path}});
+        if(folder&&!Directory.Exists(path))throw new DirectoryNotFoundException("The capture folder could not be found.");
+        if(!folder&&!File.Exists(path))throw new FileNotFoundException("This capture no longer exists.",path);
+        if(OperatingSystem.IsWindows())
+        {
+            if(folder)global::FrameForge.ShellPaths.OpenFolder(path);
+            else using(Process.Start(new ProcessStartInfo(path){UseShellExecute=true})){ }
+            return;
+        }
+        var executable=OperatingSystem.IsMacOS()?"/usr/bin/open":Find("xdg-open");
+        if(executable==null)throw new InvalidOperationException("A Linux file opener is unavailable. Install xdg-utils and a file manager. Capture location: "+path);
+        var process=Process.Start(StartInfo(executable,new[]{path}))??throw new IOException("The file manager could not start.");
+        // Some desktop openers remain attached to their viewer. Observe immediate errors,
+        // then leave a successfully launched viewer running independently of FrameForge.
+        async Task<ProcessResult> Observe()
+        {
+            using(process)
+            {
+                var output=ReadBounded(process.StandardOutput);var error=ReadBounded(process.StandardError);
+                await process.WaitForExitAsync();return new(process.ExitCode,await output,await error);
+            }
+        }
+        var completion=Observe();
+        if(await Task.WhenAny(completion,Task.Delay(1500))!=completion)
+        {
+            _=completion.ContinueWith(t=>{_ = t.Exception;},TaskContinuationOptions.OnlyOnFaulted);
+            return;
+        }
+        var result=await completion;
+        if(result.ExitCode!=0)throw new InvalidOperationException("Your desktop could not open "+(folder?"the capture folder":"this capture")+". Check that a file manager or viewer is installed. Location: "+path);
     }
 }

@@ -10,6 +10,7 @@ import subprocess
 import sys
 import threading
 import uuid
+import xml.etree.ElementTree as ET
 
 def emit(event, **values):
     print(json.dumps(dict(event=event, **values), ensure_ascii=False), flush=True)
@@ -76,7 +77,19 @@ class Portal:
                 pass
             self.pending = None
 
+    def require(self, pointer=False):
+        try:
+            xml = self.call("org.freedesktop.DBus.Introspectable", "Introspect", "()", ()).unpack()[0]
+            interfaces = {item.get("name") for item in ET.fromstring(xml).findall("interface")}
+        except GLib.Error as error:
+            raise RuntimeError("The Linux desktop sharing service is unavailable. Sign in to a desktop with its matching XDG portal backend.") from error
+        required = [CAST, REMOTE] if pointer else [CAST]
+        if any(name not in interfaces for name in required):
+            feature = "automatic scrolling with pointer control" if pointer else "screen recording"
+            raise RuntimeError("This Linux session does not provide " + feature + ". Use a desktop with a compatible XDG portal backend. WSLg may support the editor without screen sharing.")
+
     def open(self, pointer, cursor, closed):
+        self.require(pointer)
         interface = REMOTE if pointer else CAST
         result = self.request(interface, "CreateSession", "(a{sv})",
                               [{"session_handle_token": GLib.Variant("s", "ff" + uuid.uuid4().hex)}])
@@ -326,12 +339,20 @@ class Capture:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=("record", "scroll", "check"))
+    parser.add_argument("mode", choices=("record", "scroll", "check", "portal-check"))
     parser.add_argument("--output")
     parser.add_argument("--audio", choices=("none", "system", "microphone", "both"), default="none")
     parser.add_argument("--no-cursor", action="store_true")
     parser.add_argument("--test", action="store_true", help="Synthetic media only; never opens the portal.")
     args = parser.parse_args()
+    if args.mode == "portal-check":
+        portal = Portal()
+        try:
+            portal.require()
+            emit("ready", platform="linux")
+        finally:
+            portal.close()
+        return 0
     if args.mode == "check":
         require_plugins(True)
         emit("ready", platform="linux")

@@ -8,7 +8,10 @@ Version: **0.3.0-preview.1**, unchanged during this development cycle. This repo
 - The updated desktop app builds with **zero warnings and zero errors** using .NET 10 SDK, targeting .NET 8.
 - **7 native Linux media checks passed on Ubuntu 26.04 x64 under WSL.** A synthetic source exercised H.264 MP4 recording, mixed stereo AAC audio, pause/resume, finalized output, full playback decoding, and refusal to overwrite an existing recording. These checks do not capture a real screen or test portal consent.
 - Ubuntu runtime/media dependencies were installed through its package manager. The project is accessed by a temporary mount of Y:/frameforge; source and app/test artifacts remain under that project folder.
-- Current Mac native helper compilation, OCR/media checks, updated package verification, and full interactive acceptance are pending. Do not treat the older CI result below as evidence for the newly added native helpers.
+- **All five native targets passed** the new build workflow at source 5a791594da961366834f633c99697b0260823c30: [native media and package CI](https://github.com/metalshanked/FrameForge/actions/runs/34852969861). Both Mac helpers compiled and passed native OCR/video/GIF checks, both Linux architectures passed native media checks, and every target passed the 68 shared checks.
+- **118 package checks passed** across Windows (16), both Macs (24 each), and both Linux architectures (27 each). Mac DMGs and Debian packages were created successfully. Later Linux error-message changes are being validated separately.
+- The Linux package launched in WSLg as a native Ubuntu application with an isolated library. Portal inspection confirmed that this WSL session provides FileChooser but lacks Screenshot, ScreenCast, RemoteDesktop, and GlobalShortcuts. Recording preflight returned the intended clear unavailable-service message, and the 7 media checks still passed.
+- Swift 5 native compilation reports concurrency-annotation warnings from AVFoundation and the queue-managed capture object; the C# builds are warning-free. Real Mac microphone/system-audio synchronization and permission behavior still require hardware testing.
 
 ## Earlier preview baseline
 

@@ -52,6 +52,7 @@ public static class PlatformCapture
     {
         using var connection=new Connection(Address.Session);
         var info=await connection.ConnectAsync();
+        await PortalSupport.Require(connection,"Screenshot","screenshot capture",cancel);
         var token="frameforge"+Guid.NewGuid().ToString("N");
         var path=new ObjectPath("/org/freedesktop/portal/desktop/request/"+info.LocalName.TrimStart(':').Replace('.','_')+"/"+token);
         var request=connection.CreateProxy<IPortalRequest>("org.freedesktop.portal.Desktop",path);

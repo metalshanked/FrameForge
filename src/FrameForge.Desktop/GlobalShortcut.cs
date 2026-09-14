@@ -75,6 +75,7 @@ public sealed class GlobalShortcut : IDisposable
             else
             {
                 result.bus=new Connection(Address.Session);var info=await result.bus.ConnectAsync();
+                await PortalSupport.Require(result.bus,"GlobalShortcuts","global capture shortcuts",cancel);
                 var portal=result.bus.CreateProxy<IShortcutPortal>("org.freedesktop.portal.Desktop","/org/freedesktop/portal/desktop");
                 var sessionResult=await Request(result.bus,info.LocalName,o=>{o["session_handle_token"]="ff"+Guid.NewGuid().ToString("N");return portal.CreateSessionAsync(o);},cancel);
                 if(!sessionResult.TryGetValue("session_handle",out var handle)||handle is not string sessionName)throw new InvalidOperationException("The desktop did not create a shortcut session.");
