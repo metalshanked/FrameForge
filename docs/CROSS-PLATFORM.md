@@ -6,7 +6,7 @@ Version **0.3.0-preview.1** is the Avalonia application for macOS, Linux, and Wi
 
 Packages include the .NET runtime; end users do not need the SDK.
 
-- **macOS 14+:** choose the Apple Silicon (osx-arm64) or Intel (osx-x64) DMG, open it, and drag FrameForge to Applications. A tar.gz containing the same app is also available. Native builds are ad-hoc signed for internal consistency. They are **not Developer ID signed or notarized**, so Gatekeeper may block downloaded previews. Distribution signing and real Mac permission tests remain release work.
+- **macOS 14+:** choose the Apple Silicon (osx-arm64) or Intel (osx-x64) DMG, open it, and drag FrameForge to Applications. A tar.gz containing the same app is also available. Native builds are ad-hoc signed for internal consistency. They are **not Developer ID signed or notarized**, so Gatekeeper may block downloaded previews. Downloaded previews may require explicit local approval, and replacing an ad-hoc-signed build can invalidate its previous screen-capture permission. Stable distribution signing and exact-build Mac capture acceptance remain release work.
 - **Debian/Ubuntu Linux:** install the matching linux-x64 or linux-arm64 .deb with the system package manager. For example: `sudo apt install ./FrameForge-Desktop-0.3.0-preview.1-linux-x64.deb`. It declares the required media, OCR, and desktop libraries. A portable tar.gz is available; extract it and run FrameForge/FrameForge.Desktop after installing equivalent dependencies.
 - **Windows x64:** extract win-x64.zip and run FrameForge.Desktop.exe with the other files alongside it. The established Windows WPF installer is the recommended Windows application while this port is being tested.
 

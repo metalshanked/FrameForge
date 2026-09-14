@@ -1,0 +1,36 @@
+{
+  "version": "0.3.0-preview.1",
+  "prerelease": true,
+  "sourceCommit": "d104fb0693ae6071ae76c427b16b35a4221a8564",
+  "runId": 34890935586,
+  "workflow": "https://github.com/metalshanked/FrameForge/actions/runs/34890935586",
+  "packageChecks": 118,
+  "status": "Preview; native automated checks passed. Physical desktop acceptance and Mac distribution signing remain incomplete.",
+  "artifacts": [
+    {
+      "name": "FrameForge-desktop-win-x64",
+      "id": 10367245111,
+      "sha256": "sha256:0ed73d00d1897486511689ed220cec7c50867b1f93514a957f63a48900abbd2f"
+    },
+    {
+      "name": "FrameForge-desktop-linux-arm64",
+      "id": 10367065946,
+      "sha256": "sha256:e888577dccbcc58ec85cfed03b0cfe0337dcc4c2d57af9f6cc8e89a016c04557"
+    },
+    {
+      "name": "FrameForge-desktop-linux-x64",
+      "id": 10367065934,
+      "sha256": "sha256:10f6d06c7b470c86723680e6387340aa0d57e521c40b4e9188011b27591c57f6"
+    },
+    {
+      "name": "FrameForge-desktop-osx-arm64",
+      "id": 10366658260,
+      "sha256": "sha256:4d119c5ebe400d169d10324408c756efd66931e4c4521c0c652e427d5bf9219c"
+    },
+    {
+      "name": "FrameForge-desktop-osx-x64",
+      "id": 10366357801,
+      "sha256": "sha256:78be74ef538a38a40e4ddbd586825b6cef9ecd7653f0923bf75bb63df09681e9"
+    }
+  ]
+}

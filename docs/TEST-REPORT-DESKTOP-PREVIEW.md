@@ -10,7 +10,7 @@ Version: **0.3.0-preview.1**, unchanged during this development cycle. The Avalo
 - **7 native Mac checks** exercise offline Vision OCR, pause/resume timestamp handling, H.264 decoding, MP4 trimming, and animated GIF conversion using synthetic input.
 - **118 package checks** across Windows (16), both Macs (24 each), and both Linux targets (27 each) verify checksums, architecture, runtime/notices, helper inclusion/permissions, Mac metadata/DMGs, and Debian metadata/dependencies.
 
-All five targets passed the startup-fix workflow at source **6cadee020424ebb0fdcf93ac7c4e2d573c2184d9**: [native CI run](https://github.com/metalshanked/FrameForge/actions/runs/34889095036). Targets are Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. Subsequent Mac screenshot-permission preflight and Linux odd-window recording fixes are being validated in the same workflow; consult the latest successful run for downloadable artifacts.
+All five targets passed the [native CI run](https://github.com/metalshanked/FrameForge/actions/runs/34890935586) at source **d104fb0693ae6071ae76c427b16b35a4221a8564**, including the Mac screenshot-permission preflight and Linux odd-window recording fixes. Targets are Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. All downloaded artifact digests and package checksums were verified locally; the complete set passed 118 package checks.
 
 The C# application builds with zero warnings/errors using .NET 10 SDK and targets .NET 8. Swift 5 compilation reports concurrency-annotation warnings from AVFoundation and the queue-managed capture object. The native media checks do not replace real microphone, display, and permission testing.
 
@@ -25,8 +25,12 @@ Tested the DMG from source **c2ac8aa3e0376eedaa59b0845038fac5a35f839a** on an In
 - Copy image populated the native clipboard with PNG and other image formats; Paste reopened the rendered image at **900 × 540** and saved a new project/PNG pair.
 - Open capture folder visibly opened the correct library in Finder.
 - Escape canceled the native region selector and restored the editor with the existing project intact.
-- Actual capture/recording reached macOS's Screen Recording permission request. Permission approval and successful real capture/recording are still pending.
-- Native menu naming and the cross-session activation bug found during acceptance were fixed after this installed build.
+- After the user granted capture permission and the app reopened, a full-screen **1920 × 1080** capture succeeded, returned to the editor, saved its project/PNG pair, and automatically populated the clipboard. The user also accepted macOS's additional direct-access prompt.
+- Region capture through the remote mouse selector returned cancellation; successful region selection has not been established.
+- Recording source enumeration succeeded on this earlier build, but an actual recording has not yet passed.
+- The final **d104fb0** Intel DMG was then verified and installed, retaining the earlier app and test library. It launches with the correct native FrameForge menu name.
+- The final app's changed ad-hoc signature invalidated the earlier capture grant: screenshot preflight and native recording source enumeration both reported denied access. No security settings were changed by automation. Exact-build capture/recording retesting and stable distribution signing remain release blockers.
+- Apple Developer Technical Support [confirms](https://developer.apple.com/forums/thread/819406) that ad-hoc signing can make each build appear to be a new app for capture permission. A stable Apple signing identity is needed for reliable permission continuity across updates.
 
 No claim is made that microphone/system-audio synchronization, automatic scrolling, global shortcuts, startup, or mixed-display behavior has passed on this Mac yet. Apple Silicon packages pass native automated tests, but there is no physical Apple Silicon desktop acceptance result.
 

@@ -1,0 +1,28 @@
+name: Prepare desktop release draft
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, feature/cross-platform-preview]
+    paths: ['releases/desktop-preview.json']
+permissions:
+  contents: read
+concurrency:
+  group: desktop-release-draft
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify packages and prepare draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/prepare-desktop-release.py
