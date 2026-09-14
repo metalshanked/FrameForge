@@ -85,6 +85,8 @@ public sealed class MainWindow : Window
     bool busy, loading;
     double zoom = 1;
     string? libraryProject;
+    readonly Stack<(CaptureLibrary.DeletedCapture capture, string title)> deletedCaptures = new();
+    Button undoDelete = null!;
     RecordingPanel? recordingPanel;
     ScrollSession? scrollSession;
     RegionPicker? regionPicker;
@@ -212,6 +214,11 @@ public sealed class MainWindow : Window
             try { captureFolderButton.ToolTip = folderHelp + "\n" + ShellPaths.ResolveExistingPath(Paths.Library); }
             catch { captureFolderButton.ToolTip = folderHelp; }
         };
+        var folderMenu = new ContextMenu();
+        var deletedFolderItem = new MenuItem { Header = "Open deleted captures" };
+        deletedFolderItem.Click += (_, _) => OpenDeletedCaptures();
+        folderMenu.Items.Add(deletedFolderItem);
+        captureFolderButton.ContextMenu = folderMenu;
         search.Children.Add(captureFolderButton);
         var libraryHeading = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         libraryHeading.Children.Add(new TextBlock { Text = "RECENT CAPTURES", FontSize = 10, FontWeight = FontWeights.SemiBold, Margin = new Thickness(4, 3, 4, 0) });
@@ -242,6 +249,10 @@ public sealed class MainWindow : Window
         root.Children.Add(bottom);
         DockPanel.SetDock(dimensions, Dock.Right);
         bottom.Children.Add(dimensions);
+        undoDelete = Ui.Button("Undo delete", UndoDeleteCapture, tooltip: "Restore the last deleted capture and its image");
+        undoDelete.Visibility = Visibility.Collapsed;
+        DockPanel.SetDock(undoDelete, Dock.Right);
+        bottom.Children.Add(undoDelete);
         bottom.Children.Add(status);
         Editor.Changed += () =>
         {
@@ -755,7 +766,27 @@ public sealed class MainWindow : Window
             button.Content = content;
             button.ToolTip = title + "\n" + File.GetLastWriteTime(path).ToString("g");
             button.Padding = new Thickness(6);
-            library.Children.Add(button);
+            System.Windows.Automation.AutomationProperties.SetName(button, "Open capture: " + title);
+            button.Margin = new Thickness(0);
+            var card = new Grid { Margin = new Thickness(4, 3, 4, 3) };
+            card.Children.Add(button);
+            var delete = Ui.Button("×", () => DeleteSavedCapture(path, title), tooltip: "Delete capture: " + title + "\nYou can undo this.");
+            delete.Width = 26; delete.Height = 26; delete.MinHeight = 0;
+            delete.Padding = new Thickness(0); delete.Margin = new Thickness(0, 2, 2, 0);
+            delete.HorizontalAlignment = HorizontalAlignment.Right;
+            delete.VerticalAlignment = VerticalAlignment.Top;
+            System.Windows.Automation.AutomationProperties.SetName(delete, "Delete capture: " + title);
+            card.Children.Add(delete);
+            var menu = new ContextMenu();
+            var openItem = new MenuItem { Header = "Open capture" };
+            openItem.Click += (_, _) => OpenPath(path);
+            var deleteItem = new MenuItem { Header = "Delete capture" };
+            deleteItem.Click += (_, _) => DeleteSavedCapture(path, title);
+            var recoverItem = new MenuItem { Header = "Open deleted captures" };
+            recoverItem.Click += (_, _) => OpenDeletedCaptures();
+            menu.Items.Add(openItem); menu.Items.Add(deleteItem); menu.Items.Add(new Separator()); menu.Items.Add(recoverItem);
+            button.ContextMenu = menu;
+            library.Children.Add(card);
         }
 
         if (library.Children.Count == 0) {
@@ -766,6 +797,61 @@ public sealed class MainWindow : Window
             empty.Margin = new Thickness(16, 14, 16, 6);
             library.Children.Add(empty);
         }
+    }
+
+    internal bool DeleteSavedCapture(string path, string title)
+    {
+        if (busy) return false;
+        try
+        {
+            bool current = libraryProject != null && string.Equals(Path.GetFullPath(path), Path.GetFullPath(libraryProject), StringComparison.OrdinalIgnoreCase);
+            if (current)
+            {
+                Persist();
+                if (Editor.Document?.Dirty == true) throw new IOException("Save this capture successfully before deleting it.");
+            }
+            var deleted = CaptureLibrary.Delete(path);
+            if (current)
+            {
+                autosave.Stop();
+                loading = true;
+                libraryProject = null;
+                Editor.SetDocument(null);
+                documentTitle.Text = "Your next idea starts with a capture";
+                documentTitle.ToolTip = null;
+                welcome.Visibility = Visibility.Visible;
+                loading = false;
+            }
+            deletedCaptures.Push((deleted, title));
+            undoDelete.Visibility = Visibility.Visible;
+            RefreshLibrary();
+            status.Text = "Deleted " + title + " · Undo is available";
+            return true;
+        }
+        catch (Exception ex) { Error(ex); return false; }
+    }
+
+    internal void UndoDeleteCapture()
+    {
+        if (deletedCaptures.Count == 0) return;
+        try
+        {
+            var deleted = deletedCaptures.Peek();
+            CaptureLibrary.Restore(deleted.capture);
+            deletedCaptures.Pop();
+            undoDelete.Visibility = deletedCaptures.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (Editor.Document == null && Path.GetExtension(deleted.capture.OriginalFiles[0]) == ".ffg")
+                OpenPath(deleted.capture.OriginalFiles[0]);
+            RefreshLibrary();
+            status.Text = "Restored " + deleted.title;
+        }
+        catch (Exception ex) { Error(ex); }
+    }
+
+    private void OpenDeletedCaptures()
+    {
+        try { ShellPaths.OpenFolder(CaptureLibrary.DeletedFolder); }
+        catch (Exception ex) { Error(ex); }
     }
 
     private static string? ReadLibraryTitle(string path)
@@ -1098,9 +1184,7 @@ public sealed class MainWindow : Window
             if (exitRequested) Close();
             else
             {
-                Show();
-                WindowState = WindowState.Normal;
-                Activate();
+                RestoreEditor();
                 Fit();
             }
         }
@@ -1108,7 +1192,9 @@ public sealed class MainWindow : Window
 
     internal void OpenCapture(BitmapSource image, string title)
     {
+        WindowActivation.Show(this);
         LoadDocument(new CaptureDocument(image) { Title = title });
+        Editor.Focus();
         try
         {
             ClipboardService.SetImage(image, handle);
@@ -1182,14 +1268,12 @@ public sealed class MainWindow : Window
 
     public void RestoreEditor()
     {
-        if (recordingPanel != null) { recordingPanel.Activate(); return; }
-        if (scrollSession != null) { scrollSession.Activate(); return; }
+        if (recordingPanel != null) { WindowActivation.Show(recordingPanel); return; }
+        if (scrollSession != null) { WindowActivation.Show(scrollSession); return; }
         regionPicker?.Cancel();
-        Show();
-        WindowState = WindowState.Normal;
-        Activate();
+        WindowActivation.Show(this);
         var dialog = OwnedWindows.Cast<Window>().FirstOrDefault(window => window.IsVisible);
-        if (dialog != null) dialog.Activate();
+        if (dialog != null) WindowActivation.Show(dialog);
     }
 
     public void StartInTray()

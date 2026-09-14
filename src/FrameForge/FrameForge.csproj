@@ -10,7 +10,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>../../assets/FrameForge.ico</ApplicationIcon>
     <AssemblyName>FrameForge</AssemblyName>
-    <Version>0.2.5</Version>
+    <Version>0.2.6</Version>
     <Authors>FrameForge contributors</Authors>
     <Description>Screen capture, annotation, scrolling capture, recording, and OCR for Windows.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

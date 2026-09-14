@@ -2,7 +2,7 @@
 param([string]$Installer)
 $ErrorActionPreference = 'Stop'
 $projectRoot = [IO.Path]::GetFullPath((Split-Path $PSScriptRoot -Parent))
-if (-not $Installer) { $Installer = Join-Path $projectRoot 'dist\FrameForge-Setup-0.2.5.exe' }
+if (-not $Installer) { $Installer = Join-Path $projectRoot 'dist\FrameForge-Setup-0.2.6.exe' }
 $testRoot = [IO.Path]::GetFullPath((Join-Path $projectRoot ('artifacts\installer-test-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))))
 if (-not $testRoot.StartsWith($projectRoot.TrimEnd('\') + '\artifacts\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Test installation must stay inside project artifacts.' }
 if (Test-Path -LiteralPath $testRoot) { throw 'Test directory already exists.' }
@@ -29,7 +29,7 @@ try {
     $expected = (Get-FileHash -LiteralPath (Join-Path $projectRoot 'dist\portable\FrameForge.exe')).Hash
     Check 'Installed executable matches portable SHA256' ((Get-FileHash -LiteralPath $installedExe).Hash -eq $expected)
     $entry = Get-ItemProperty -LiteralPath ($testKey + '\Uninstall')
-    Check 'Per-user uninstall registration has version and location' ($entry.DisplayVersion -eq '0.2.5' -and $entry.InstallLocation -eq $testRoot)
+    Check 'Per-user uninstall registration has version and location' ($entry.DisplayVersion -eq '0.2.6' -and $entry.InstallLocation -eq $testRoot)
     Check 'Startup is opt-in and disabled on a fresh install' (-not (Test-Path -LiteralPath ($testKey + '\Run')))
     $shell = New-Object -ComObject WScript.Shell
     $shortcut = $shell.CreateShortcut((Join-Path $testRoot '.test-shell\StartMenu\FrameForge.lnk'))
