@@ -456,6 +456,11 @@ func convertVideo(_ args: [String: String]) async throws {
             let args = options()
             switch args["mode"] {
             case "check": emit("ready", ["platform": "macos"])
+            case "screen-permission":
+                guard CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() else {
+                    throw Failure.message("Allow Screen Recording for FrameForge in System Settings → Privacy & Security, then reopen the app. The capture has not started.")
+                }
+                emit("ready", ["platform": "macos"])
             case "sources": try await sources()
             case "convert": try await convertVideo(args)
             case "self-test": try await selfTest(args["output"] ?? "native-mac-checks")

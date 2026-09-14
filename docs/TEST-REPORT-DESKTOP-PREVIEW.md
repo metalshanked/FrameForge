@@ -1,36 +1,49 @@
 # Desktop preview verification
 
-Version: **0.3.0-preview.1**, unchanged during this development cycle. This report applies to the Avalonia app; the existing Windows WPF installer is separate.
+Version: **0.3.0-preview.1**, unchanged during this development cycle. The Avalonia desktop app is separate from the Windows WPF installer.
 
-## Current development checks
+## Automated checks
 
-- **68 shared-core checks passed on Windows x64.** Coverage includes project persistence, annotations, undo/redo, redaction, image transforms/export, scrolling overlap and rejection, atomic writes, process cancellation/literal arguments, recoverable capture deletion, restoration conflicts/path boundaries, and annotation resizing.
-- The updated desktop app builds with **zero warnings and zero errors** using .NET 10 SDK, targeting .NET 8.
-- **7 native Linux media checks passed on Ubuntu 26.04 x64 under WSL.** A synthetic source exercised H.264 MP4 recording, mixed stereo AAC audio, pause/resume, finalized output, full playback decoding, and refusal to overwrite an existing recording. These checks do not capture a real screen or test portal consent.
-- Ubuntu runtime/media dependencies were installed through its package manager. The project is accessed by a temporary mount of Y:/frameforge; source and app/test artifacts remain under that project folder.
-- **All five native targets passed** the new build workflow at source 5a791594da961366834f633c99697b0260823c30: [native media and package CI](https://github.com/metalshanked/FrameForge/actions/runs/34852969861). Both Mac helpers compiled and passed native OCR/video/GIF checks, both Linux architectures passed native media checks, and every target passed the 68 shared checks.
-- **118 package checks passed** across Windows (16), both Macs (24 each), and both Linux architectures (27 each). Mac DMGs and Debian packages were created successfully. Later Linux error-message changes are being validated separately.
-- The Linux package launched in WSLg as a native Ubuntu application with an isolated library. Portal inspection confirmed that this WSL session provides FileChooser but lacks Screenshot, ScreenCast, RemoteDesktop, and GlobalShortcuts. Recording preflight returned the intended clear unavailable-service message, and the 7 media checks still passed.
-- Swift 5 native compilation reports concurrency-annotation warnings from AVFoundation and the queue-managed capture object; the C# builds are warning-free. Real Mac microphone/system-audio synchronization and permission behavior still require hardware testing.
+- **68 shared-core checks per target** cover projects, annotation rendering, undo/redo, redaction, image transforms/export, scrolling overlap and rejection, atomic writes, process cancellation/literal arguments, recoverable capture deletion, restoration conflicts/path boundaries, and annotation resizing.
+- **3 single-instance checks** cover activation from separate process sessions, delivery of a capture request to the existing app, and restart after the primary process is killed. A real WSL test exposed a session-scoped mutex bug; the shared lock now spans sessions and handles an abandoned owner.
+- **7 native Linux media checks** exercise a real GStreamer pipeline using synthetic frames and mixed audio: H.264 MP4, stereo AAC, pause/resume, duration, full decoding, and overwrite protection.
+- **7 native Mac checks** exercise offline Vision OCR, pause/resume timestamp handling, H.264 decoding, MP4 trimming, and animated GIF conversion using synthetic input.
+- **118 package checks** across Windows (16), both Macs (24 each), and both Linux targets (27 each) verify checksums, architecture, runtime/notices, helper inclusion/permissions, Mac metadata/DMGs, and Debian metadata/dependencies.
 
-## Earlier preview baseline
+All five targets passed the startup-fix workflow at source **6cadee020424ebb0fdcf93ac7c4e2d573c2184d9**: [native CI run](https://github.com/metalshanked/FrameForge/actions/runs/34889095036). Targets are Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. A subsequent Mac screenshot-permission preflight change is being validated in the same workflow; consult the latest successful run for downloadable artifacts.
 
-The earlier preview passed 52 shared checks on Windows and WSL, Windows UI smoke checks for launch/region capture/Escape/clipboard/annotation/exit, and an application dependency audit. All five native GitHub targets passed shared checks and packaging at source commit 1a4d4d0c2aa5e9b161bcf77b925cbdd473a1b91a:
+The C# application builds with zero warnings/errors using .NET 10 SDK and targets .NET 8. Swift 5 compilation reports concurrency-annotation warnings from AVFoundation and the queue-managed capture object. The native media checks do not replace real microphone, display, and permission testing.
 
-[Earlier CI run](https://github.com/metalshanked/FrameForge/actions/runs/34798123097)
+## Physical Intel Mac acceptance
 
-Those checks predate native recording/audio, automatic scrolling, recoverable library deletion, resize handles, and sign-in startup. They are retained as baseline history only.
+Tested the DMG from source **c2ac8aa3e0376eedaa59b0845038fac5a35f839a** on an Intel Mac running **macOS 15.7.9**, with a 1920 × 1080 display at native scaling:
 
-## Current validation workflow
+- Verified the transferred DMG checksum, installed its app bundle in the user's Applications directory, and verified its ad-hoc code signature.
+- All **7 native Mac checks passed on the actual Mac**.
+- Launched the installed app with a separate test library and opened a synthetic 900 × 540 editable project.
+- OCR in the actual interface returned the expected “FRAMEFORGE LOCAL OCR TEST” text.
+- Copy image populated the native clipboard with PNG and other image formats; Paste reopened the rendered image at **900 × 540** and saved a new project/PNG pair.
+- Open capture folder visibly opened the correct library in Finder.
+- Escape canceled the native region selector and restored the editor with the existing project intact.
+- Actual capture/recording reached macOS's Screen Recording permission request. Permission approval and successful real capture/recording are still pending.
+- Native menu naming and the cross-session activation bug found during acceptance were fixed after this installed build.
 
-The workflow builds Windows x64, macOS Apple Silicon and Intel, and Ubuntu x64 and ARM64. It runs shared core checks, packages each target, verifies checksums/architecture/runtime/notices, and verifies the native helpers. Mac packages include an ad-hoc signed app and a DMG; they are not Developer ID signed or notarized. Linux package checks include Debian metadata and media dependencies.
+No claim is made that microphone/system-audio synchronization, automatic scrolling, global shortcuts, startup, or mixed-display behavior has passed on this Mac yet. Apple Silicon packages pass native automated tests, but there is no physical Apple Silicon desktop acceptance result.
 
-Synthetic Linux media checks use GStreamer test sources. Synthetic Mac checks exercise local Vision OCR, video timestamp handling across a pause, MP4 decoding metadata, trimming, and animated GIF conversion. Neither substitutes for screen permissions or physical audio/display checks.
+## Ubuntu WSL acceptance
 
-## Remaining desktop acceptance
+Ubuntu 26.04 x64 under WSLg was used on the Windows development machine:
 
-The checklist in CROSS-PLATFORM.md covers packaged launch, screen/window/region capture, cancellation and permission denial, clipboard, shortcuts, tray/startup, capture deletion/restoration, recording with real audio sources, automatic scrolling, OCR languages, and mixed display scaling.
+- Installed runtime/media dependencies through Ubuntu's package manager.
+- Launched the Linux packaged app and native file picker with an isolated capture library.
+- Passed native media checks and the single-instance regression, including different Unix sessions and forced-exit recovery.
+- Inspected the session's portal interfaces: FileChooser is available; Screenshot, ScreenCast, RemoteDesktop, and GlobalShortcuts are absent.
+- Recording preflight returned the intended explanation that this session cannot share the screen.
 
-WSLg is a valid local Linux UI/media environment, but its portal capabilities differ from a normal Linux desktop. ScreenCast, RemoteDesktop pointer control, and GlobalShortcuts still require a compatible desktop session. macOS interactive acceptance requires access to the user's Mac and approval of its system permission prompts.
+WSLg is useful for Linux UI, file/process integration, OCR/media, and package checks. It does **not** establish production screen-sharing, pointer-control, global-shortcut, or tray behavior on GNOME/KDE and other Linux desktops. A compatible desktop session remains necessary for those acceptance checks.
 
-No production readiness or full feature parity is claimed before those checks pass. Test screenshots, recordings, projects, and machine-specific data are excluded from Git.
+## Distribution status and data
+
+Mac installers are ad-hoc signed and **not Developer ID signed or notarized**. Public download/Gatekeeper behavior requires distribution signing work. Workflow artifacts are previews; no stable cross-platform release is published automatically.
+
+The full remaining acceptance checklist is in CROSS-PLATFORM.md. Source, local packages, and test artifacts on Windows stay under Y:/frameforge; WSL mounts that same project. The Mac has its installed app and an isolated test folder. Synthetic test captures, real test captures, machine connection details, and SSH credentials are excluded from Git.

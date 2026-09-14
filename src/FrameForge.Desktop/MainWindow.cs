@@ -187,6 +187,7 @@ public sealed partial class MainWindow : Window
     async Task Capture(bool region)
     {
         if(recorder!=null)throw new InvalidOperationException("Stop recording before starting a screenshot.");
+        if(OperatingSystem.IsMacOS())await NativeBridge.Run("screen-permission",Array.Empty<string>(),Token);
         var screen=Screens.ScreenFromWindow(this)??Screens.Primary??throw new InvalidOperationException("No screen is available.");
         Hide();CaptureTrace.Write("editor hidden; capture starting");
         try
@@ -207,6 +208,7 @@ public sealed partial class MainWindow : Window
     async Task CaptureWindow()
     {
         if(recorder!=null)throw new InvalidOperationException("Stop recording before capturing a window.");
+        await NativeBridge.Run("screen-permission",Array.Empty<string>(),Token);
         string path=System.IO.Path.Combine(AppPaths.Temp,Guid.NewGuid().ToString("N")+".png");
         Hide();
         try
