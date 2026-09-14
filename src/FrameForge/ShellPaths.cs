@@ -35,15 +35,16 @@ internal static class ShellPaths
     {
         Directory.CreateDirectory(path);
         string resolved = ResolveExistingPath(path);
-        // Ask the Windows shell to open the directory itself. Starting explorer.exe
-        // only confirms that a launcher process started, not that the folder was opened.
-        var start = new ProcessStartInfo(resolved)
+        // Open a new Explorer view explicitly. The directory's shell "open" verb
+        // can hand off successfully without showing a window on some Windows setups.
+        var start = new ProcessStartInfo(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "explorer.exe"))
         {
-            UseShellExecute = true,
-            Verb = "open",
+            Arguments = "/n,/e,\"" + resolved + "\"",
+            UseShellExecute = false,
             WindowStyle = ProcessWindowStyle.Normal
         };
         using var process = Process.Start(start);
+        if (process is null) throw new IOException("Windows could not start File Explorer.");
         return resolved;
     }
 

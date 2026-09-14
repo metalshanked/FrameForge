@@ -2,7 +2,7 @@
 
 This update applies to the native Windows app and installer.
 
-- **Open capture folder** opens the actual library directory through the Windows shell, including paths redirected by a packaged launcher. Failures produce an app error instead of treating an Explorer launcher process as success.
+- **Open capture folder** explicitly opens a new File Explorer window at the library directory. This avoids a Windows shell handoff that could silently show no window. Paths are resolved before launch, and launch errors appear in the app.
 - **Delete recent captures:** each card has an accessible × button and a right-click Delete capture action. The editable project or recording and its PNG move together into `%LOCALAPPDATA%\FrameForge\Deleted Captures`. Undo delete restores them; multiple deletions can be undone during the current app session.
 - Deleting the open capture stops autosave and clears the editor. Other exports remain unchanged. Locked companion files roll back the move, and Undo refuses to overwrite files that already exist.
 - Right-click **Open capture folder → Open deleted captures** to recover earlier deleted files or remove them permanently in File Explorer. Deleted files continue to use disk space until removed.
