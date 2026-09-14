@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Stage verified CI packages in a GitHub draft prerelease; never publish it."""
-import hashlib, json, os, pathlib, subprocess, sys, zipfile
+import hashlib, json, os, pathlib, subprocess, sys, time, zipfile
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REPO = os.environ.get("GITHUB_REPOSITORY", "metalshanked/FrameForge")
 CONFIG = ROOT / "releases/desktop-preview.json"
@@ -11,6 +11,15 @@ def gh(*args, binary=False):
 
 def api(path):
     return json.loads(gh("api", f"repos/{REPO}/{path}"))
+
+def find_release(tag, attempts=1):
+    for attempt in range(attempts):
+        release = next((r for r in api("releases?per_page=100") if r["tag_name"] == tag), None)
+        if release:
+            return release
+        if attempt + 1 < attempts:
+            time.sleep(2)
+    return None
 
 def digest(path):
     with path.open("rb") as stream:
@@ -69,15 +78,16 @@ def main():
         print("Verified all nine packages from five pinned CI archives; no GitHub mutations.")
         return
     notes = ROOT / "docs/releases/0.3.0-preview.1.md"
-    releases = api("releases?per_page=100")
-    release = next((r for r in releases if r["tag_name"] == tag), None)
+    release = find_release(tag)
     if release:
         if not release["draft"] or release["target_commitish"] != commit:
             raise RuntimeError("Refusing to replace a published release or a different source commit.")
     else:
         gh("release", "create", tag, "--repo", REPO, "--target", commit, "--draft", "--prerelease",
            "--title", "FrameForge 0.3.0-preview.1 — macOS and Linux preview", "--notes-file", str(notes))
-        release = next(r for r in api("releases?per_page=100") if r["tag_name"] == tag)
+        release = find_release(tag, attempts=10)
+        if release is None:
+            raise RuntimeError("GitHub created the draft but has not exposed it yet; rerun to resume safely.")
     gh("release", "edit", tag, "--repo", REPO, "--draft", "--prerelease", "--notes-file", str(notes))
     assets = packages + [output / "SHA256SUMS.txt", output / "BUILD-INFO.json"]
     existing = {a["name"]: a for a in api(f'releases/{release["id"]}')["assets"]}
