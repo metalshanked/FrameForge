@@ -68,6 +68,9 @@ def package(rid, dotnet, skip_build):
                         "-o", str(work)], cwd=ROOT, check=True)
     if not (work / ("FrameForge.Desktop.exe" if rid.startswith("win") else "FrameForge.Desktop")).is_file():
         raise RuntimeError(f"No published executable at {work}")
+    for debug_symbol in work.rglob("*.pdb"):
+        debug_symbol.resolve().relative_to(work.resolve())
+        debug_symbol.unlink()
     for name in ("LICENSE", "THIRD-PARTY-NOTICES.md"):
         shutil.copy2(ROOT / name, work / name)
     shutil.copy2(ROOT / "docs/CROSS-PLATFORM.md", work / "README-FIRST.md")
