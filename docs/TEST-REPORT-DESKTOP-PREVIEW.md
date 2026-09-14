@@ -11,13 +11,17 @@ Version: 0.3.0-preview.1. This report applies to the new Avalonia application, n
 - Dependency audit of the desktop application, including transitive dependencies, returned no known vulnerable packages. Uses Tmds.DBus 0.95.1 rather than the earlier vulnerable version found during initial restore.
 - Compiled using the project-local .NET 10 SDK with no compiler warnings in the final publish runs. The shipped runtime target remains .NET 8.
 
+- **Native GitHub CI passed on all five targets:** Windows x64, macOS Apple Silicon and Intel, and Ubuntu 24.04 x64 and ARM64. Each runner executed the 52 shared-core checks, built its self-contained package, and verified the archive. Both Linux runners also inspected their Debian package metadata.
+- [Verified CI run](https://github.com/metalshanked/FrameForge/actions/runs/34798123097), source commit 1a4d4d0c2aa5e9b161bcf77b925cbdd473a1b91a. The initial Linux ARM64 run exposed an upstream SkiaSharp native startup failure; the pinned 3.119.4 dependency passed the native rerun. See [upstream fix](https://github.com/mono/SkiaSharp/pull/3494).
+- **90 package checks passed** across the five target archives in native CI. These verify archive integrity, checksums, executable architecture, runtime target, notices, macOS bundle metadata/icon, executable permissions, and exclusion of development/user files.
+
 ## Packages and remaining acceptance
 
 The packaging verifier checks each runtime archive's checksum, executable architecture, licenses, runtime configuration and exclusion of personal/development data. It also checks macOS bundle metadata/icon and Unix executable permissions. Debian packages are additionally inspected with Ubuntu's package tools. Package verification results are written to dist/desktop-preview/PACKAGE-CHECKS.txt.
 
 macOS GUI launch, Screen Recording permissions, native selector behavior and hotkeys have **not** been tested on a Mac. Linux portal screenshots, global shortcuts, tray behavior, recording, and distribution-specific GUI dependencies still require testing on the user's Linux desktop. Intel/ARM64 binaries being present is not proof of hardware compatibility.
 
-The workflow in .github/workflows/desktop.yml provides native OS builds and shared-core checks when run on GitHub. Its presence does not imply those CI runs have already passed.
+The workflow in .github/workflows/desktop.yml runs native builds, shared-core checks and package verification. The successful run linked above does not exercise interactive screen capture or OS permission dialogs.
 
 Video-only recording, OCR, and video conversion are implemented in the preview but were not exercised end-to-end in this UI smoke test. Their native acceptance steps and current feature gaps are listed in CROSS-PLATFORM.md. There is no claim of full feature parity or production readiness.
 
