@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <ApplicationIcon>../../assets/FrameForge.ico</ApplicationIcon>
+    <AssemblyName>FrameForge.Desktop</AssemblyName><Version>0.3.0-preview.1</Version>
+    <Description>FrameForge cross-platform desktop preview</Description><PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../FrameForge.Core/FrameForge.Core.csproj" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Tmds.DBus" Version="0.95.1" />
+    <AvaloniaResource Include="../../assets/FrameForge.ico" Link="Assets/FrameForge.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../licenses/*.txt" Link="licenses/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
