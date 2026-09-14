@@ -1,4 +1,4 @@
-FRAMEFORGE 0.2.5
+FRAMEFORGE 0.2.6
 
 Capture: press Ctrl plus the tilde/backtick key (no Shift needed).
 Completed screenshots open in the editor and copy automatically to the clipboard.
@@ -15,6 +15,14 @@ PREFERENCES
 Turn Start FrameForge when I sign in to Windows on to launch quietly in the tray.
 Turn Keep running in the tray off if you prefer the window's Close button to exit.
 Keyboard shortcuts can be changed independently in Keyboard shortcuts.
+
+RECENT CAPTURES
+Use the x button on a recent capture, or right-click it and choose Delete capture.
+The editable project and its PNG are moved together into Deleted Captures.
+Undo delete restores them. Deleting the open capture clears the editor.
+Right-click Open capture folder and choose Open deleted captures to recover
+older deleted files or remove them permanently in File Explorer.
+Deleted files remain on disk until you remove them; exports elsewhere are untouched.
 
 YOUR DATA
 Captures and settings stay in %LOCALAPPDATA%\FrameForge.

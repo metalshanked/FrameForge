@@ -5,16 +5,16 @@ Unicode true
 !include "Sections.nsh"
 !include "x64.nsh"
 Name "FrameForge"
-OutFile "..\dist\FrameForge-Setup-0.2.5.exe"
+OutFile "..\dist\FrameForge-Setup-0.2.6.exe"
 InstallDir "$LOCALAPPDATA\Programs\FrameForge"
 RequestExecutionLevel user
 SetCompressor /SOLID lzma
 SetCompressorDictSize 32
 ManifestDPIAware true
-VIProductVersion "0.2.5.0"
+VIProductVersion "0.2.6.0"
 VIAddVersionKey /LANG=1033 "ProductName" "FrameForge"
 VIAddVersionKey /LANG=1033 "FileDescription" "FrameForge Setup"
-VIAddVersionKey /LANG=1033 "FileVersion" "0.2.5"
+VIAddVersionKey /LANG=1033 "FileVersion" "0.2.6"
 VIAddVersionKey /LANG=1033 "LegalCopyright" "FrameForge contributors"
 !define MUI_ICON "..\assets\FrameForge.ico"
 !define MUI_UNICON "..\assets\FrameForge.ico"
@@ -107,7 +107,7 @@ Section "FrameForge (required)" Core
     WriteINIStr "$INSTDIR\install.ini" "FrameForge" "TestMode" "$TestMode"
     WriteRegStr HKCU "$AppKey" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "$UninstallKey" "DisplayName" "FrameForge"
-    WriteRegStr HKCU "$UninstallKey" "DisplayVersion" "0.2.5"
+    WriteRegStr HKCU "$UninstallKey" "DisplayVersion" "0.2.6"
     WriteRegStr HKCU "$UninstallKey" "Publisher" "FrameForge contributors"
     WriteRegStr HKCU "$UninstallKey" "InstallLocation" "$INSTDIR"
     WriteRegStr HKCU "$UninstallKey" "DisplayIcon" "$INSTDIR\FrameForge.exe,0"
